@@ -7,6 +7,7 @@ import { Dashboard } from './pages/Dashboard'
 import { Organizations } from './pages/Organizations'
 import { Boxes } from './pages/Boxes'
 import { BoxDetails } from './pages/BoxDetails'
+import { Sales } from './pages/Sales'
 
 
 function App() {
@@ -19,6 +20,8 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/organizations" element={<Organizations />} />
               <Route path="/boxes/:boxId" element={<BoxDetails />} />
+<Route path="/sales" element={<Sales />} />
+<Route path="/sales/:saleId" element={<SaleDetails />} />
               <Route path="/boxes" element={<Boxes />} />
               <Route path="*" element={<div>Page not found</div>} />
             </Routes>
