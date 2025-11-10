@@ -18,13 +18,6 @@ export const auth = defineAuth({
       verificationEmailSubject: 'Welcome to SMASH SCRAP - Verify your email',
       verificationEmailBody: (createCode) =>
         `Your verification code is: ${createCode()}`,
-            passwordPolicy: {
-        minLength: 8,
-        requireNumbers: true,
-        requireLowercase: true,
-        requireUppercase: true,
-        requireSpecialCharacters: true,
-      },
     },
   },
 
