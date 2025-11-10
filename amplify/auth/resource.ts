@@ -1,4 +1,5 @@
 import { defineAuth } from '@aws-amplify/backend';
+import { preTokenGeneration } from '../function/pre-token-generation/resource';
 
 /**
  * Define and configure your auth resource
@@ -44,4 +45,9 @@ export const auth = defineAuth({
 
   // Account recovery settings
   accountRecovery: 'EMAIL_ONLY',
+
+    // Lambda triggers for JWT claim customization
+  triggers: {
+    preTokenGeneration,
+  },
 });
