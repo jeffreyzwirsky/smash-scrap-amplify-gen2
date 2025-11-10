@@ -2,7 +2,7 @@ import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 
 /*== SMASH SCRAP - COMPLETE DATABASE SCHEMA ==
  * 
- * This schema defines 7 tables for the SMASH SCRAP inventory management system:
+ * This schema defines 9 tables for the SMASH SCRAP inventory management system:
  * 1. Organizations - Multi-tenant organization data
  * 2. Users - User profiles with role-based access
  * 3. Boxes - Container/package inventory
@@ -10,6 +10,8 @@ import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
  * 5. Sales - Marketplace listings and auctions
  * 6. Bids - Buyer bids on sales
  * 7. TermsAcceptance - Track buyer acceptance of sale terms
+  * 8. UserModule - Module permissions per user
+   * 9. OrganizationModule - Module permissions per organization
  * 
  * Features:
  * - Multi-tenant isolation via orgID
@@ -52,6 +54,7 @@ const schema = a.schema({
     .authorization((allow) => [
       allow.authenticated(),
       allow.group('SuperAdmin'),
+          orgModules: a.hasMany('OrganizationModule', 'orgID'),
     ]),
 
   // ============================================
@@ -71,6 +74,7 @@ const schema = a.schema({
       organization: a.belongsTo('Organization', 'orgID'),
       status: a.enum(['active', 'inactive', 'suspended']),
       permissions: a.json(),
+          themePreference: a.enum(['dark', 'light', 'system']),
       lastLoginAt: a.datetime(),
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
@@ -83,6 +87,7 @@ const schema = a.schema({
     .authorization((allow) => [
       allow.owner(),
       allow.group('SuperAdmin'),
+          userModules: a.hasMany('UserModule', 'userID'),
       allow.group('SellerAdmin').to(['read', 'update']),
     ]),
 
@@ -320,6 +325,60 @@ const schema = a.schema({
       allow.group('SuperAdmin'),
       allow.group('SellerAdmin').to(['read']),
       allow.owner().to(['read', 'create']),
+    ]),
+
+    // ============================================
+  // USER MODULES TABLE (Module Permissions per User)
+  // ============================================
+  UserModule: a
+    .model({
+      moduleID: a.id(),
+      userID: a.id(),
+      user: a.belongsTo('User', 'userID'),
+      moduleName: a.enum([
+        'boxes_management', 'parts_management', 'inventory_reporting', 'photo_upload',
+        'sales_creation', 'bidding', 'sales_analytics', 'auction_notifications',
+        'organization_management', 'user_management', 'settings_management',
+        'quality_inspection', 'approval_system',
+        'advanced_reporting', 'data_export', 'custom_notifications', 'api_access'
+      ]),
+      enabled: a.boolean(),
+      enabledAt: a.datetime(),
+      enabledBy: a.id(),
+      disabledAt: a.datetime(),
+      disabledBy: a.id(),
+      notes: a.string(),
+      createdAt: a.datetime(),
+      updatedAt: a.datetime(),
+    })
+    .authorization((allow) => [
+      allow.group('SuperAdmin'),
+    ]),
+
+    // ============================================
+  // ORGANIZATION MODULES TABLE (Module Permissions per Org)
+  // ============================================
+  OrganizationModule: a
+    .model({
+      moduleID: a.id(),
+      orgID: a.id(),
+      organization: a.belongsTo('Organization', 'orgID'),
+      moduleName: a.enum([
+        'boxes_management', 'parts_management', 'inventory_reporting', 'photo_upload',
+        'sales_creation', 'bidding', 'sales_analytics', 'auction_notifications',
+        'organization_management', 'user_management', 'settings_management',
+        'quality_inspection', 'approval_system',
+        'advanced_reporting', 'data_export', 'custom_notifications', 'api_access'
+      ]),
+      enabled: a.boolean(),
+      enabledAt: a.datetime(),
+      enabledBy: a.id(),
+      notes: a.string(),
+      createdAt: a.datetime(),
+      updatedAt: a.datetime(),
+    })
+    .authorization((allow) => [
+      allow.group('SuperAdmin'),
     ]),
 
 });
