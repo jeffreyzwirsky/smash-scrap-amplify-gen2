@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { generateClient } from 'aws-amplify/data'
-import type { Schema } from '../../../amplify/data/resource'
-import { uploadData } from 'aws-amplify/storage'
+import type { Schema } from '../../amplify/data/resource'
 
 const client = generateClient<Schema>()
 
@@ -36,7 +35,6 @@ export function BoxDetails() {
   const [parts, setParts] = useState<Part[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddPart, setShowAddPart] = useState(false)
-  // New states for editing and deleting
   const [editingPart, setEditingPart] = useState<Part | null>(null)
   const [deletingPart, setDeletingPart] = useState<Part | null>(null)
 
@@ -83,10 +81,9 @@ export function BoxDetails() {
       await client.models.Part.update({
         partID,
         ...updates
-      });
+      })
       await fetchBoxDetails()
       setEditingPart(null)
-      // Show success toast here if you use one
     } catch (error) {
       console.error('Error updating part:', error)
       alert('Failed to update part')
@@ -94,12 +91,11 @@ export function BoxDetails() {
   }
 
   async function handleDeletePart(partID: string) {
-    if (!confirm('Delete this part? This cannot be undone.')) return;
+    if (!confirm('Delete this part? This cannot be undone.')) return
     try {
-      await client.models.Part.delete({ partID });
+      await client.models.Part.delete({ partID })
       await fetchBoxDetails()
       setDeletingPart(null)
-      // Show success message here if you use one
     } catch (error) {
       console.error('Error deleting part:', error)
       alert('Failed to delete part')
@@ -210,13 +206,19 @@ export function BoxDetails() {
                     <td className="px-6 py-4 text-sm text-white">{part.images?.length || 0}</td>
                     <td className="px-6 py-4 flex gap-2">
                       <button
-                        onClick={() => setEditingPart(part)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setEditingPart(part)
+                        }}
                         className="text-blue-400 hover:text-blue-300 font-bold"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => setDeletingPart(part)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setDeletingPart(part)
+                        }}
                         className="text-red-500 hover:text-red-400 font-bold"
                       >
                         Delete
@@ -230,7 +232,6 @@ export function BoxDetails() {
         )}
       </div>
 
-      {/* Add Part Modal */}
       {showAddPart && (
         <AddPartModal
           boxId={box.boxID}
@@ -242,7 +243,6 @@ export function BoxDetails() {
         />
       )}
 
-      {/* Edit Part Modal */}
       {editingPart && (
         <EditPartModal
           part={editingPart}
@@ -253,7 +253,6 @@ export function BoxDetails() {
         />
       )}
 
-      {/* Delete Part Modal */}
       {deletingPart && (
         <DeletePartModal
           part={deletingPart}
@@ -285,6 +284,7 @@ function AddPartModal({ boxId, onClose, onSuccess }: { boxId: string, onClose: (
         partName,
         fillLevel,
         weightLb: weight ? parseFloat(weight) : undefined,
+        orgID: 'default-org', // Replace with actual orgID
       })
       alert('Part added successfully!')
       onSuccess()
