@@ -1,42 +1,54 @@
-import { useState } from "react";
-import Sidebar from "./Sidebar";
-import TopBar from "./TopBar";
+import { Bars3Icon, BellIcon } from "@heroicons/react/24/outline";
 
-/**
- * Layout goals:
- * - Fixed (sticky) left sidebar on lg+ screens, slide-over drawer on mobile
- * - Sticky top bar
- * - Independently scrollable main content area
- * - Prevent flex overflow with min-w-0 and content container max width
- * - Dark navy brand background throughout
- */
-export default function MainLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
+export default function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   return (
-    <div className="min-h-screen bg-[#0b1437] text-white">
-      {/* App grid: 16rem sidebar on lg+, 1fr content */}
-      <div className="grid grid-cols-1 lg:grid-cols-[16rem_1fr]">
-        {/* Sidebar: sticky on desktop, slide-over on mobile */}
-        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <header
+      className="
+        h-16 bg-[#0f172a] border-b border-gray-800
+        sticky top-0 z-40
+        flex items-center justify-between
+        px-4 sm:px-6 lg:px-8
+      "
+      role="banner"
+    >
+      {/* Left: mobile menu button + (optional) breadcrumb/search */}
+      <div className="flex items-center gap-3 min-w-0">
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden rounded-md p-2 hover:bg-white/5"
+          aria-label="Open navigation"
+        >
+          <Bars3Icon className="h-6 w-6" />
+        </button>
 
-        {/* Right column (topbar + content) */}
-        <div className="min-h-screen flex flex-col min-w-0">
-          <TopBar onMenuClick={() => setSidebarOpen(true)} />
-
-          {/* Scrollable content area, padded, centered */}
-          <main
-            className="
-              flex-1 overflow-y-auto bg-[#0b1437]
-              px-4 sm:px-6 lg:px-8 py-6
-            "
-          >
-            <div className="mx-auto w-full max-w-[1600px] min-w-0">
-              {children}
-            </div>
-          </main>
+        <div className="hidden md:block text-sm text-slate-300 truncate">
+          <span className="text-slate-400">Environment:</span> Production •{" "}
+          <span className="text-slate-400">Region:</span> ca-central-1
         </div>
       </div>
-    </div>
+
+      {/* Right: actions */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        <button
+          className="rounded-md p-2 hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#21808d]"
+          aria-label="Notifications"
+        >
+          <BellIcon className="h-6 w-6 text-slate-300" />
+        </button>
+
+        <div className="h-8 w-px bg-gray-800 mx-1 sm:mx-2" aria-hidden="true" />
+
+        {/* Avatar placeholder */}
+        <button
+          className="
+            h-8 w-8 rounded-full bg-gradient-to-br from-[#21808d] to-[#0b1437]
+            ring-1 ring-gray-700 hover:ring-gray-600 transition
+            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#21808d]
+          "
+          aria-label="Open profile menu"
+          title="Account"
+        />
+      </div>
+    </header>
   );
 }
