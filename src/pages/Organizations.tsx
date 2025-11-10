@@ -1,20 +1,118 @@
+import { useState, useEffect } from 'react'
+import { generateClient } from 'aws-amplify/data'
+import type { Schema } from '../../amplify/data/resource'
+
+const client = generateClient<Schema>()
+
+interface Organization {
+  id: string
+  name: string
+  trustLevel?: string
+  createdAt?: string
+}
+
 export function Organizations() {
+  const [orgs, setOrgs] = useState<Organization[]>([])
+  const [loading, setLoading] = useState(true)
+  const [newOrgName, setNewOrgName] = useState('')
+
+  useEffect(() => {
+    fetchOrganizations()
+  }, [])
+
+  async function fetchOrganizations() {
+    try {
+      const { data } = await client.models.Organization.list()
+      setOrgs(data as Organization[])
+    } catch (error) {
+      console.error('Error fetching organizations:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function createOrganization() {
+    if (!newOrgName.trim()) return
+
+    try {
+      await client.models.Organization.create({
+        name: newOrgName,
+        trustLevel: 'STANDARD'
+      })
+      setNewOrgName('')
+      fetchOrganizations()
+    } catch (error) {
+      console.error('Error creating organization:', error)
+    }
+  }
+
+  if (loading) {
+    return <div className="p-8">Loading organizations...</div>
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-gray-900">Organizations</h2>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-          Create Organization
-        </button>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-2">Organizations</h1>
+      <p className="text-gray-600 dark:text-gray-400 mb-8">
+        Manage salvage yard organizations
+      </p>
+
+      {/* Create Organization Form */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-8">
+        <h2 className="text-xl font-bold mb-4">Create New Organization</h2>
+        <div className="flex gap-4">
+          <input
+            type="text"
+            placeholder="Organization name"
+            value={newOrgName}
+            onChange={(e) => setNewOrgName(e.target.value)}
+            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          />
+          <button
+            onClick={createOrganization}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg"
+          >
+            Create
+          </button>
+        </div>
       </div>
-      
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600">
-          Organization management interface will be implemented here.
-        </p>
-        <p className="text-sm text-gray-500 mt-2">
-          This page will allow SuperAdmin and SellerAdmin to create and manage salvage yard organizations.
-        </p>
+
+      {/* Organizations List */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                Trust Level
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                Created
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            {orgs.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
+                  No organizations yet. Create your first one above!
+                </td>
+              </tr>
+            ) : (
+              orgs.map((org) => (
+                <tr key={org.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{org.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{org.trustLevel || 'N/A'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {org.createdAt ? new Date(org.createdAt).toLocaleDateString() : 'N/A'}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
