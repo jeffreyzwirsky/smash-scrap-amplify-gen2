@@ -3,16 +3,19 @@ import { useEffect, useState } from 'react'
 import { generateClient } from 'aws-amplify/data'
 import type { Schema } from '../../amplify/data/resource'
 import { useUserRole } from '../hooks/useUserRole'
-
-const client = generateClient<Schema>()
+import { getCurrentUser } from 'aws-amplify/auth'
 
 export function Dashboard() {
+  const client = generateClient<Schema>()
   const navigate = useNavigate()
-  const { userRole, loading: roleLoading } = useUserRole()
+  const { role: userRole, loading: roleLoading } = useUserRole()
   const [stats, setStats] = useState({ boxes: 0, parts: 0, sales: 0 })
+  const [userInfo, setUserInfo] = useState<any>(null)
+  const [orgInfo, setOrgInfo] = useState<any>(null)
 
   useEffect(() => {
     fetchStats()
+    fetchUserAndOrg()
   }, [])
 
   async function fetchStats() {
@@ -33,6 +36,21 @@ export function Dashboard() {
     }
   }
 
+  async function fetchUserAndOrg() {
+    try {
+      const currentUser = await getCurrentUser()
+      const { data: user } = await client.models.User.get({ userID: currentUser.userId })
+      setUserInfo(user)
+
+      if (user?.orgID) {
+        const { data: org } = await client.models.Organization.get({ orgID: user.orgID })
+        setOrgInfo(org)
+      }
+    } catch (error) {
+      console.error('Error fetching user/org info:', error)
+    }
+  }
+
   if (roleLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -44,7 +62,14 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-white">SMASH SCRAP Dashboard</h1>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white">SMASH SCRAP Dashboard</h1>
+          {orgInfo && (
+            <p className="text-gray-400 mt-2">
+              Organization: <span className="text-red-500 font-medium">{orgInfo.orgName}</span>
+            </p>
+          )}
+        </div>
         
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
