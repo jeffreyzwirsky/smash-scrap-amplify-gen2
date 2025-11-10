@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React from 'react'
 
 interface CardProps {
   children: React.ReactNode
@@ -23,14 +23,14 @@ export const Card: React.FC<CardProps> = ({
   }
 
   return (
-    <div className={`bg-[#1a1b1e] border border-[#2d2e32] rounded-xl shadow-lg ${className}`}>
+    <div className={`bg-dark-bg-tertiary border border-dark-bg-border rounded-xl shadow-lg ${className}`}>
       {title && (
-        <div className={`flex justify-between items-center border-b border-[#2d2e32] ${paddingClasses[padding]}`}>
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
+        <div className={`flex justify-between items-center border-b border-dark-bg-border pb-4 ${paddingClasses[padding]}`}>
+          <h3 className="text-lg font-semibold text-dark-text-primary">{title}</h3>
           {action}
         </div>
       )}
-      <div className={paddingClasses[padding]}>
+      <div className={title ? `${paddingClasses[padding]} pt-4` : paddingClasses[padding]}>
         {children}
       </div>
     </div>
