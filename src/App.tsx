@@ -29,7 +29,7 @@ function App() {
               <Route path="/sales/:saleId" element={<SaleDetails />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/marketplace/:saleId" element={<MarketplaceListing />} />
-              <Route path="*" element={<div>Page not found</div>} />
+              <Route path="*" element={<div className="p-8">Page not found</div>} />
             </Routes>
           </Layout>
         </BrowserRouter>
