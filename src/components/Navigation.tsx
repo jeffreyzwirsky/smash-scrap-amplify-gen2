@@ -24,6 +24,9 @@ export function Navigation() {
             <Link to="/parts" className="text-gray-700 hover:text-blue-600 font-medium">
   Parts
 </Link>
+          <Link to="/sales" className="text-gray-700 hover:text-blue-600 font-medium">
+  Sales
+</Link>
 
             Boxes
             
