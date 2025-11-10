@@ -5,6 +5,7 @@ import outputs from '../amplify_outputs.json'
 import App from './App.tsx'
 import './index.css'
 
+// Configure Amplify with backend resources
 Amplify.configure(outputs)
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
