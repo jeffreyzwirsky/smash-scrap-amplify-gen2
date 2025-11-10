@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { generateClient } from 'aws-amplify/data'
 import type { Schema } from '../../amplify/data/resource'
 
-const client = generateClient<Schema>()
-
 interface Box {
   boxID: string
   boxNumber: string
@@ -12,9 +10,11 @@ interface Box {
   materialType?: string
   netWeightLb?: number
   partsCount?: number
+  orgID?: string
 }
 
 export function Boxes() {
+  const client = generateClient<Schema>()
   const navigate = useNavigate()
   const [boxes, setBoxes] = useState<Box[]>([])
   const [loading, setLoading] = useState(true)
@@ -101,6 +101,7 @@ export function Boxes() {
 }
 
 function CreateBoxModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
+  const client = generateClient<Schema>()
   const [boxNumber, setBoxNumber] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -112,7 +113,7 @@ function CreateBoxModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
       await client.models.Box.create({
         boxNumber,
         status: 'draft',
-        orgID: 'default-org', // Replace with actual orgID from user context
+        orgID: 'default-org',
       })
       alert('Box created successfully!')
       onSuccess()
