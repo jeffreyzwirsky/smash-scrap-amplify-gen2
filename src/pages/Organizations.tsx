@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { generateClient } from 'aws-amplify/data'
 import type { Schema } from '../../amplify/data/resource'
 import { useUserRole } from '../hooks/useUserRole'
+import { signOut } from 'aws-amplify/auth'
+import { MainLayout } from '../components/layout/MainLayout'
 
 interface Organization {
   orgID: string
@@ -77,7 +79,7 @@ export function Organizations() {
     setSuccess(null)
 
     try {
-      // ✅ CRITICAL FIX: Generate unique orgID
+      // ✅ Generate unique orgID
       const orgID = `org-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       
       console.log('Creating organization:', { orgID, orgName: newOrgName })
@@ -129,29 +131,33 @@ export function Organizations() {
     return users.filter(user => user.orgID === orgId)
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-white text-xl">Loading organizations...</p>
-      </div>
-    )
-  }
-
   // Only SuperAdmin can access this page
   if (currentUserRole !== 'SuperAdmin') {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500 text-xl mb-4">Access Denied</p>
-          <p className="text-gray-400">Only SuperAdmin can manage organizations</p>
+      <MainLayout onSignOut={signOut}>
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <p className="text-red-500 text-xl mb-4">Access Denied</p>
+            <p className="text-gray-400">Only SuperAdmin can manage organizations</p>
+          </div>
         </div>
-      </div>
+      </MainLayout>
+    )
+  }
+
+  if (loading) {
+    return (
+      <MainLayout onSignOut={signOut}>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-white text-xl">Loading organizations...</p>
+        </div>
+      </MainLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
-      <div className="max-w-7xl mx-auto">
+    <MainLayout onRefresh={fetchOrganizations} onSignOut={signOut}>
+      <div className="space-y-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Organizations</h1>
           <p className="text-gray-400">Manage salvage yard organizations and user assignments</p>
@@ -330,7 +336,7 @@ export function Organizations() {
           />
         )}
       </div>
-    </div>
+    </MainLayout>
   )
 }
 
