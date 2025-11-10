@@ -145,6 +145,8 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.group('SuperAdmin'),
+      // Org isolation: only members of the org can access
+      allow.owner('orgID', {identityClaim: 'custom:orgID'}),
       allow.group('SellerAdmin').to(['read', 'create', 'update', 'delete']),
       allow.group('YardOperator').to(['read', 'create', 'update']),
       allow.group('Inspector').to(['read']),
@@ -237,7 +239,8 @@ const schema = a.schema({
       antiSnipingMinutes: a.integer(),
       
       // Status
-      status: a.enum(['draft', 'active', 'closed', 'sold', 'cancelled']),
+// GSI for scheduled bid closer: query by status + bidDueAt
+            status: a.enum(['draft', 'active', 'closed', 'sold', 'cancelled']),
       
       // Winner tracking
       winningBidID: a.id(),
