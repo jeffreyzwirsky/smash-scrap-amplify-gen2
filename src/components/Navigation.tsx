@@ -21,7 +21,12 @@ export function Navigation() {
             to="/boxes"
             className="text-gray-700 hover:text-blue-600 font-medium"
           >
+            <Link to="/parts" className="text-gray-700 hover:text-blue-600 font-medium">
+  Parts
+</Link>
+
             Boxes
+            
           </Link>
         </div>
       </div>
