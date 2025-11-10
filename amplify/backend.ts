@@ -24,7 +24,7 @@ const backend = defineBackend({
 });
 
 
-);
+
 
 // TODO: Add image processing Lambda when created
 // TODO: Configure S3 event notifications for image uploads
