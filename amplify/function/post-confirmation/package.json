@@ -1,0 +1,21 @@
+{
+  "name": "post-confirmation",
+  "version": "1.0.0",
+  "description": "Post-confirmation Lambda trigger for SMASH SCRAP user setup",
+  "type": "module",
+  "main": "handler.ts",
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.650.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  },
+  "author": "SMASH SCRAP Team",
+  "license": "UNLICENSED",
+  "private": true
+}
