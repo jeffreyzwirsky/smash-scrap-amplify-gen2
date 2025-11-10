@@ -1,11 +1,13 @@
-# MarketplaceListing.tsx (Black Theme with Red Buttons)
-
-```typescript
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { generateClient } from 'aws-amplify/data'
 import type { Schema } from '../../amplify/data/resource'
 import { useUserRole } from '../hooks/useUserRole'
+
+// Dummy notification hook (replace with your preferred toast/notification system)
+function showNotification(message: string) {
+  alert(message)
+}
 
 const client = generateClient<Schema>()
 
@@ -36,9 +38,37 @@ export function MarketplaceListing() {
 
   useEffect(() => {
     fetchSale()
+    // Subscription logic
+    if (!saleId) return
+    let subscription: any = null
+
+    (async () => {
+      const { data } = await client.models.Sale.get({ saleID: saleId! })
+      const saleRes = data as Sale
+      setSale(saleRes)
+
+      // Only subscribe if sale is valid
+      if (saleRes?.saleID) {
+        subscription = client.models.Bid.onCreate({
+          filter: { saleID: { eq: saleRes.saleID } }
+        }).subscribe({
+          next: (newBid) => {
+            if ('bidAmount' in newBid && newBid.bidAmount > (saleRes.currentBid || 0)) {
+              setSale(prev => prev ? { ...prev, currentBid: newBid.bidAmount } : prev)
+              showNotification(`New bid: $${newBid.bidAmount.toFixed(2)}`)
+            }
+          }
+        })
+      }
+    })()
+
+    return () => {
+      if (subscription) subscription.unsubscribe()
+    }
   }, [saleId])
 
   async function fetchSale() {
+    setLoading(true)
     try {
       const { data } = await client.models.Sale.get({ saleID: saleId! })
       setSale(data as Sale)
@@ -251,4 +281,3 @@ function TermsModal({ onClose, onAccept }: { onClose: () => void, onAccept: () =
     </div>
   )
 }
-```
