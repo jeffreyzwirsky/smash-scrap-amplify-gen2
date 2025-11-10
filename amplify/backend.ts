@@ -8,14 +8,10 @@ import { postConfirmation } from './function/post-confirmation/resource'
 /**
  * SMASH SCRAP - Amplify Gen 2 Backend Configuration
  */
-const backend = defineBackend({
+defineBackend({
   auth,
   data,
   storage,
   imageProcessor,
   postConfirmation
 })
-
-// Grant post-confirmation Lambda access to DynamoDB User table
-const userTable = backend.data.resources.tables['User']
-userTable.grantReadWriteData(backend.postConfirmation.resources.lambda)
