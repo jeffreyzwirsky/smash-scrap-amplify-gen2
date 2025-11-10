@@ -32,7 +32,6 @@ export function Sales() {
   async function fetchSales() {
     try {
       if (!orgId) return
-
       const { data } = await client.models.Sale.list({
         filter: { orgID: { eq: orgId } }
       })
@@ -63,7 +62,6 @@ export function Sales() {
         </button>
       </div>
 
-      {/* Filters */}
       <div className="bg-white p-6 rounded-lg shadow mb-8">
         <div className="flex gap-4">
           <select
@@ -84,7 +82,6 @@ export function Sales() {
         </p>
       </div>
 
-      {/* Sales Table */}
       {loading ? (
         <div className="text-center py-8">Loading sales...</div>
       ) : filtered.length === 0 ? (
@@ -100,7 +97,6 @@ export function Sales() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Current Bid</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Start Time</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End Time</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
@@ -127,9 +123,6 @@ export function Sales() {
                   </td>
                   <td className="px-6 py-4">${sale.currentBid?.toFixed(2) || '0.00'}</td>
                   <td className="px-6 py-4">
-                    {sale.startTime ? new Date(sale.startTime).toLocaleString() : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4">
                     {sale.endTime ? new Date(sale.endTime).toLocaleString() : 'N/A'}
                   </td>
                   <td className="px-6 py-4">
@@ -147,7 +140,6 @@ export function Sales() {
         </div>
       )}
 
-      {/* Create Sale Modal */}
       {showCreateModal && (
         <CreateSaleModal
           orgId={orgId!}
@@ -162,7 +154,6 @@ export function Sales() {
   )
 }
 
-// Create Sale Modal
 function CreateSaleModal({ orgId, onClose, onCreated }: {
   orgId: string
   onClose: () => void
@@ -218,7 +209,6 @@ function CreateSaleModal({ orgId, onClose, onCreated }: {
         requireTermsAcceptance: true,
       })
 
-      // Update box status to "listed"
       await client.models.Box.update({
         boxID: selectedBoxId,
         status: 'listed',
@@ -254,7 +244,6 @@ function CreateSaleModal({ orgId, onClose, onCreated }: {
               ))}
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium mb-1">Listing Title *</label>
             <input
@@ -266,7 +255,6 @@ function CreateSaleModal({ orgId, onClose, onCreated }: {
               placeholder="e.g., Mixed Aluminum Scrap - 250 lbs"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium mb-1">Description</label>
             <textarea
@@ -277,7 +265,6 @@ function CreateSaleModal({ orgId, onClose, onCreated }: {
               placeholder="Describe the contents and condition..."
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium mb-1">Auction Type *</label>
             <select
@@ -289,7 +276,6 @@ function CreateSaleModal({ orgId, onClose, onCreated }: {
               <option value="open">Open Bid (public bidding)</option>
             </select>
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Starting Price ($) *</label>
@@ -313,7 +299,6 @@ function CreateSaleModal({ orgId, onClose, onCreated }: {
               />
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Start Time *</label>
@@ -336,7 +321,6 @@ function CreateSaleModal({ orgId, onClose, onCreated }: {
               />
             </div>
           </div>
-
           <div className="flex gap-3 mt-6">
             <button
               type="button"
