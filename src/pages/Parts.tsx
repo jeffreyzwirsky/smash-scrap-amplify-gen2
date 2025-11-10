@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { generateClient } from 'aws-amplify/data'
 import type { Schema } from '../../amplify/data/resource'
 
-const client = generateClient<Schema>()
-
 interface Part {
   partID: string
   partNumber: string
@@ -16,6 +14,7 @@ interface Part {
 }
 
 export function Parts() {
+  const client = generateClient<Schema>()
   const navigate = useNavigate()
   const [parts, setParts] = useState<Part[]>([])
   const [loading, setLoading] = useState(true)
@@ -65,7 +64,6 @@ export function Parts() {
           </button>
         </div>
 
-        {/* Search */}
         <div className="mb-6">
           <input
             type="text"
@@ -78,7 +76,6 @@ export function Parts() {
 
         <p className="text-gray-400 mb-4">Showing {filtered.length} of {parts.length} parts</p>
 
-        {/* Parts Table */}
         <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 overflow-hidden">
           {filtered.length === 0 ? (
             <div className="px-6 py-12 text-center">
