@@ -1,3 +1,4 @@
+text
 # SMASH SCRAP - AWS Amplify Gen 2 Serverless Platform
 
 A modern, serverless inventory management and auction system for salvage yards, built with AWS Amplify Gen 2.
@@ -8,10 +9,10 @@ SMASH SCRAP provides a complete solution for salvage yard operations, featuring:
 
 - **Multi-tenant architecture** with organization-scoped data isolation
 - **Role-based access control** with 5 distinct user types
-- **Inventory management** for boxes (packages) and parts
+- **Inventory management** for boxes (packages) and parts with image upload
 - **Auction system** with sealed and open bidding
-- **Image processing** with HEIC support, auto-resizing, and thumbnails
-- **Real-time updates** via GraphQL subscriptions
+- **Complete buyer marketplace** with terms acceptance and bidding
+- **Real-time GraphQL API** powered by AWS AppSync
 
 ## 🏗️ Tech Stack
 
@@ -19,7 +20,8 @@ SMASH SCRAP provides a complete solution for salvage yard operations, featuring:
 - **React 18** with **Vite** for fast development
 - **TypeScript** for type safety
 - **Tailwind CSS** for styling
-- **ESLint** for code quality
+- **React Router** for navigation
+- **AWS Amplify UI** for authentication
 
 ### Backend (AWS Amplify Gen 2)
 - **Authentication**: Amazon Cognito
@@ -28,7 +30,7 @@ SMASH SCRAP provides a complete solution for salvage yard operations, featuring:
   - Optional MFA (SMS + TOTP)
 - **API**: AWS AppSync (GraphQL)
 - **Database**: Amazon DynamoDB
-  - 7 tables: Organizations, Users, Boxes, Parts, Sales, Bids, TermsAcceptance
+  - **9 tables**: Organizations, Users, Boxes, Parts, Sales, Bids, TermsAcceptance, UserModule, OrganizationModule
 - **Storage**: Amazon S3
   - Private, organization-scoped image storage
   - Signed URLs for secure access
@@ -50,79 +52,77 @@ Before you begin, ensure you have:
 
 ### 1. Clone the Repository
 
-```bash
 git clone https://github.com/jeffreyzwirsky/smash-scrap-amplify-gen2.git
 cd smash-scrap-amplify-gen2
-```
+
+text
 
 ### 2. Install Dependencies
 
-```bash
-# Install root dependencies
 npm install
 
-# Install Lambda function dependencies
-cd amplify/function/post-confirmation
-npm install
-cd ../../..
-
-cd amplify/function/image-processor
-npm install
-cd ../../..
-```
+text
 
 ### 3. Start Amplify Sandbox
 
 The Amplify sandbox provides a cloud-based development environment:
 
-```bash
 npx ampx sandbox
-```
 
-This will:
-- Deploy all backend resources to AWS
-- Generate the `amplify_outputs.json` file
-- Watch for changes and auto-deploy
+text
+
+**Wait until you see:**
+✔ Deployment completed
+File written: amplify_outputs.json
+[Sandbox] Watching for file changes...
+
+text
 
 ### 4. Start Development Server
 
-In a new terminal:
+In a **new terminal**:
 
-```bash
 npm run dev
-```
+
+text
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## 📁 Project Structure
 
-```
 smash-scrap-amplify-gen2/
 ├── amplify/
-│   ├── auth/
-│   │   └── resource.ts          # Cognito configuration
-│   ├── data/
-│   │   └── resource.ts          # DynamoDB schema (7 tables)
-│   ├── storage/
-│   │   └── resource.ts          # S3 configuration
-│   ├── function/
-│   │   ├── post-confirmation/   # User setup Lambda
-│   │   │   ├── resource.ts
-│   │   │   ├── handler.ts
-│   │   │   └── package.json
-│   │   └── image-processor/     # Image processing Lambda
-│   │       ├── resource.ts
-│   │       ├── handler.ts
-│   │       └── package.json
-│   └── backend.ts               # Backend resource wiring
+│ ├── auth/
+│ │ └── resource.ts # Cognito configuration
+│ ├── data/
+│ │ └── resource.ts # DynamoDB schema (9 tables)
+│ ├── storage/
+│ │ └── resource.ts # S3 configuration
+│ └── backend.ts # Backend resource wiring
 ├── src/
-│   ├── App.tsx                  # Main React component
-│   ├── main.tsx                 # Entry point
-│   └── index.css                # Tailwind styles
-├── public/                       # Static assets
+│ ├── App.tsx # Main app with routing
+│ ├── main.tsx # Entry point with Amplify config
+│ ├── components/
+│ │ ├── Layout.tsx # Page layout with header/nav
+│ │ └── Navigation.tsx # Main navigation bar
+│ ├── hooks/
+│ │ └── useUserRole.ts # Custom hook for user info
+│ ├── pages/
+│ │ ├── Dashboard.tsx # Main dashboard
+│ │ ├── Organizations.tsx # Org management
+│ │ ├── Boxes.tsx # Box inventory list
+│ │ ├── BoxDetails.tsx # Box details with parts
+│ │ ├── Parts.tsx # All parts view
+│ │ ├── Sales.tsx # Sales management (seller)
+│ │ ├── SaleDetails.tsx # Sale management & bids
+│ │ ├── Marketplace.tsx # Buyer marketplace browse
+│ │ └── MarketplaceListing.tsx # Listing details & bidding
+│ └── index.css # Tailwind styles
+├── public/ # Static assets
 ├── package.json
 └── README.md
-```
+
+text
 
 ## 👥 User Roles
 
@@ -136,7 +136,7 @@ smash-scrap-amplify-gen2/
 
 ## 🗄️ Database Schema
 
-### Core Tables
+### Core Tables (9 Total)
 
 1. **Organizations** - Multi-tenant organization data
 2. **Users** - User profiles with role-based access
@@ -148,41 +148,80 @@ smash-scrap-amplify-gen2/
 4. **Parts** - Individual parts within boxes
    - Material type, fill level
    - Up to 10 images (at least 1 required)
-   - Weight tracking
+   - Weight tracking (lb/kg)
 5. **Sales** - Marketplace listings and auctions
    - Sealed/open bidding
    - Bid deadlines, anti-sniping
    - Terms acceptance required
 6. **Bids** - Buyer bids on sales
-7. **TermsAcceptance** - Track buyer acceptance of sale terms
+   - Bid status tracking
+   - Automatic winner selection
+7. **TermsAcceptance** - Legal audit trail for terms acceptance
+8. **UserModule** - Module permissions per user
+9. **OrganizationModule** - Module permissions per organization
 
-## 🖼️ Image Processing
+## ✅ Completed Features
 
-The image processor Lambda handles:
+### Inventory Management
+- ✅ Create, view, and manage boxes
+- ✅ Add parts to boxes with images
+- ✅ Finalize boxes (locks from editing)
+- ✅ Image upload to S3
+- ✅ Weight calculations (lb/kg)
+- ✅ Search and filter functionality
 
-- **HEIC to JPG conversion** using `heic-convert`
-- **Resize to max 2560px** (maintaining aspect ratio)
-- **Generate 800px thumbnails**
-- **Strip GPS data** from EXIF
-- **Preserve EXIF time and orientation**
-- **Enforce 5MB max file size**
+### Sales & Auctions
+- ✅ Create sales from finalized boxes
+- ✅ Sealed and open bid auction types
+- ✅ Set starting price, reserve price, timing
+- ✅ Activate and close sales
+- ✅ Automatic winner selection
+- ✅ Bid tracking and ranking
 
-> **Note**: The image processor is currently a stub. Full implementation with `sharp` and `heic-convert` needs to be completed.
+### Buyer Marketplace
+- ✅ Browse active listings
+- ✅ View listing details
+- ✅ Place bids with validation
+- ✅ Terms & conditions acceptance
+- ✅ Bid confirmation and feedback
 
-## 🚀 Deployment
+### User Management
+- ✅ Cognito authentication
+- ✅ Multi-tenant data isolation
+- ✅ Role-based access control
+- ✅ Custom user attributes (orgID, role)
 
-### Deploy to AWS
+## 🚀 Complete User Workflows
 
-```bash
-npx ampx pipeline-deploy --branch main --app-id <YOUR_APP_ID>
-```
+### Seller Workflow
+1. Create organization
+2. Create box (draft status)
+3. Add parts with images (up to 10 per part)
+4. Finalize box (locks editing)
+5. Create sale listing
+6. Activate auction
+7. Monitor bids in real-time
+8. Close auction → Winner auto-selected
+9. Box marked as "sold"
 
-### Environment Variables
+### Buyer Workflow
+1. Browse marketplace
+2. View listing details
+3. Review terms & conditions
+4. Accept terms
+5. Submit bid (validated)
+6. Track bid status
+7. If winner → Arrange payment/pickup
 
-Set in Amplify Console → App Settings → Environment variables:
+## 🖼️ Image Upload
 
-- `VITE_AWS_REGION`: `ca-central-1`
-- Add any other environment-specific variables
+Parts support up to 10 images each:
+- Uploaded to S3 private storage
+- Access via signed URLs
+- Organization-scoped paths
+- Automatic image count tracking
+
+> **Note**: HEIC conversion and auto-resizing planned for image-processor Lambda
 
 ## 🛠️ Development Workflow
 
@@ -192,13 +231,6 @@ Set in Amplify Console → App Settings → Environment variables:
 2. Sandbox will auto-detect changes and redeploy
 3. Test changes in your local React app
 
-### Adding New Lambda Functions
-
-1. Create new directory in `/amplify/function/`
-2. Add `resource.ts` and `handler.ts`
-3. Create `package.json` with dependencies
-4. Import and register in `amplify/backend.ts`
-
 ### Updating the Schema
 
 Edit `/amplify/data/resource.ts`:
@@ -206,26 +238,48 @@ Edit `/amplify/data/resource.ts`:
 - Update authorization rules
 - Sandbox will regenerate GraphQL API
 
+### Adding New Pages
+
+1. Create new component in `/src/pages/`
+2. Add route in `/src/App.tsx`
+3. Add navigation link in `/src/components/Navigation.tsx`
+
 ## 📝 Next Steps
 
-### Frontend Development
-- [ ] Build Box/Part management UI (SellerAdmin, YardOperator)
-- [ ] Implement Marketplace and bidding interface (Buyer)
-- [ ] Create user management dashboard (SuperAdmin)
-- [ ] Add image upload with S3 signed URLs
-- [ ] Implement real-time updates with GraphQL subscriptions
-
-### Backend Completion
-- [ ] Complete image processor Lambda implementation
+### Backend Enhancements
+- [ ] Complete image processor Lambda (HEIC conversion, resizing)
 - [ ] Add S3 event trigger for automatic image processing
-- [ ] Implement DynamoDB User record creation in post-confirmation
-- [ ] Add email notifications for bids and sales
+- [ ] Implement email notifications for bids and sales
+- [ ] Add GraphQL subscriptions for real-time updates
 - [ ] Set up CloudWatch monitoring and alarms
+
+### Frontend Enhancements
+- [ ] Add edit/delete functionality for boxes and parts
+- [ ] Build user management dashboard (SuperAdmin)
+- [ ] Add image gallery/lightbox for part images
+- [ ] Implement real-time bid updates with subscriptions
+- [ ] Add export functionality (CSV/PDF reports)
+- [ ] Build seller analytics dashboard
 
 ### Testing
 - [ ] Write unit tests for Lambda functions
 - [ ] Add integration tests for GraphQL API
 - [ ] Perform end-to-end testing of workflows
+- [ ] Load testing for concurrent auctions
+
+## 🚀 Deployment
+
+### Deploy to Production
+
+npx ampx pipeline-deploy --branch main --app-id <YOUR_APP_ID>
+
+text
+
+### Environment Variables
+
+Set in Amplify Console → App Settings → Environment variables:
+
+- `VITE_AWS_REGION`: `ca-central-1`
 
 ## 📚 Documentation
 
@@ -246,8 +300,19 @@ Private - UNLICENSED
 
 ## 👨‍💻 Author
 
-SMASH SCRAP Team
+Jeffrey Zwirsky - SMASH SCRAP Team
 
 ---
 
 **Built with** ❤️ **using AWS Amplify Gen 2**
+
+**Status**: 🎉 **Core platform complete and functional** 🎉
+Summary of Changes:
+✅ Updated database count (7 → 9 tables)
+✅ Added complete page structure
+✅ Marked all completed features as DONE
+✅ Added complete user workflows
+✅ Updated Next Steps to reflect current state
+✅ Added proper status badge at bottom
+
+Replace your README.md with this updated version! 🚀
