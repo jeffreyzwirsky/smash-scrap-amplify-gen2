@@ -1,7 +1,6 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 
 const schema = a.schema({
-  
   Organization: a
     .model({
       orgID: a.id(),
@@ -224,17 +223,17 @@ const schema = a.schema({
 
   TermsAcceptance: a
     .model({
-      acceptanceID: a.id(),
+      acceptanceID: a.id().required(),
       saleID: a.id().required(),
       sale: a.belongsTo('Sale', 'saleID'),
       buyerID: a.id().required(),
       buyer: a.belongsTo('User', 'buyerID'),
       orgID: a.id().required(),
       organization: a.belongsTo('Organization', 'orgID'),
-      acceptedAt: a.datetime(),
+      acceptedAt: a.datetime().required(),
       ipAddress: a.string(),
       userAgent: a.string(),
-      termsVersion: a.string(),
+      termsVersion: a.string().required(),
       createdAt: a.datetime(),
     })
     .identifier(['acceptanceID'])
@@ -294,7 +293,6 @@ const schema = a.schema({
     .authorization((allow) => [
       allow.group('SuperAdmin'),
     ]),
-
 });
 
 export type Schema = ClientSchema<typeof schema>;
