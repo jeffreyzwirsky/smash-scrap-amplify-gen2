@@ -7,12 +7,6 @@ import { postConfirmation } from './function/post-confirmation/resource'
 
 /**
  * SMASH SCRAP - Amplify Gen 2 Backend Configuration
- * 
- * Resources:
- * - Auth: Cognito with custom attributes and groups
- * - Data: AppSync GraphQL API with DynamoDB
- * - Storage: S3 for org-scoped image storage
- * - Functions: Lambda triggers and processors
  */
 export const backend = defineBackend({
   auth,
@@ -22,8 +16,10 @@ export const backend = defineBackend({
   postConfirmation
 })
 
-// Wire post-confirmation trigger to Cognito User Pool
-backend.auth.resources.userPool.addTrigger(
-  'PostConfirmation',
-  backend.resources.postConfirmation
+// Grant post-confirmation Lambda access to DynamoDB User table
+const userTable = backend.data.resources.tables['User']
+backend.postConfirmation.resources.lambda.addEnvironment(
+  'USER_TABLE_NAME',
+  userTable.tableName
 )
+userTable.grantReadWriteData(backend.postConfirmation.resources.lambda)
