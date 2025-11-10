@@ -16,16 +16,31 @@ interface NavItem {
   roles?: string[]
 }
 
+interface NavSection {
+  title: string
+  items: NavItem[]
+}
+
 export const Sidebar: React.FC = () => {
   const location = useLocation()
   const { role } = useUserRole()
 
-  const navItems: NavItem[] = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/boxes', label: 'Inventory', icon: Package },
-    { path: '/parts', label: 'Parts', icon: Settings },
-    { path: '/marketplace', label: 'Marketplace', icon: Hammer },
-    { path: '/organizations', label: 'Organizations', icon: Building2, roles: ['SuperAdmin'] }
+  const navSections: NavSection[] = [
+    {
+      title: 'CORE OPERATIONS',
+      items: [
+        { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { path: '/boxes', label: 'Inventory Management', icon: Package },
+        { path: '/parts', label: 'Converter Builder', icon: Settings },
+        { path: '/marketplace', label: 'Auctions', icon: Hammer }
+      ]
+    },
+    {
+      title: 'ADMINISTRATION',
+      items: [
+        { path: '/organizations', label: 'Organizations', icon: Building2, roles: ['SuperAdmin'] }
+      ]
+    }
   ]
 
   const isActive = (path: string) => location.pathname === path
@@ -36,52 +51,64 @@ export const Sidebar: React.FC = () => {
   }
 
   return (
-    <aside className="bg-gray-900 w-64 min-h-screen flex flex-col border-r border-gray-800">
-      {/* Logo */}
+    <aside className="w-64 min-h-screen bg-[#111c44] border-r border-gray-800 flex flex-col">
+      {/* Logo Header */}
       <div className="p-6 border-b border-gray-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg">
             <Package className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">SMASH</h1>
-            <p className="text-xs text-gray-500">Scrap Management</p>
+            <h1 className="text-xl font-bold text-white tracking-tight">SMASH</h1>
+            <p className="text-xs text-gray-400">Scrap Management</p>
           </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-1">
-        {navItems
-          .filter(canAccessRoute)
-          .map((item) => {
-            const Icon = item.icon
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  isActive(item.path)
-                    ? 'bg-red-600 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="text-sm font-medium">{item.label}</span>
-              </Link>
-            )
-          })}
+      {/* Navigation Sections */}
+      <nav className="flex-1 px-4 py-6 space-y-8 overflow-y-auto">
+        {navSections.map((section) => (
+          <div key={section.title}>
+            <h3 className="px-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+              {section.title}
+            </h3>
+            <div className="space-y-1">
+              {section.items
+                .filter(canAccessRoute)
+                .map((item) => {
+                  const Icon = item.icon
+                  const active = isActive(item.path)
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`
+                        flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200
+                        ${active 
+                          ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-900/50' 
+                          : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+                        }
+                      `}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{item.label}</span>
+                    </Link>
+                  )
+                })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      {/* Footer */}
+      {/* User Footer */}
       <div className="p-4 border-t border-gray-800">
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-            <span className="text-xs font-bold text-white">{role[0]}</span>
+        <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-gray-800/50">
+          <div className="w-9 h-9 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center text-white font-bold text-sm">
+            {role[0]}
           </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-white">{role}</p>
-            <p className="text-xs text-gray-500">Active</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white truncate">{role}</p>
+            <p className="text-xs text-gray-400">Active</p>
           </div>
         </div>
       </div>

@@ -4,16 +4,14 @@ import type { Schema } from '../../amplify/data/resource'
 import { getCurrentUser } from 'aws-amplify/auth'
 import { signOut } from 'aws-amplify/auth'
 import { MainLayout } from '../components/layout/MainLayout'
-import { DollarSign, Package, Car, Gavel, Clock } from 'lucide-react'
+import { DollarSign, Package, Car, Gavel, Clock, TrendingUp } from 'lucide-react'
 
 export function Dashboard() {
   const client = generateClient<Schema>()
   const [stats, setStats] = useState({ boxes: 0, parts: 0, sales: 0 })
   const [loading, setLoading] = useState(true)
-  const [userInfo, setUserInfo] = useState<any>(null)
   const [orgInfo, setOrgInfo] = useState<any>(null)
   const [recentBoxes, setRecentBoxes] = useState<any[]>([])
-  const [activeSales, setActiveSales] = useState<any[]>([])
 
   useEffect(() => {
     fetchDashboardData()
@@ -29,32 +27,26 @@ export function Dashboard() {
         getCurrentUser()
       ])
 
-      // Set real stats
       setStats({
         boxes: boxesData.data.length,
         parts: partsData.data.length,
         sales: salesData.data.length
       })
 
-      // Get recent boxes (last 5)
+      // Get recent boxes
       const sortedBoxes = [...boxesData.data].sort((a: any, b: any) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
       setRecentBoxes(sortedBoxes.slice(0, 5))
 
-      // Get active sales
-      setActiveSales(salesData.data.slice(0, 3))
-
-      // Get user and org info
+      // Get organization
       const { data: user } = await client.models.User.get({ userID: currentUser.userId })
-      setUserInfo(user)
-
       if (user?.orgID) {
         const { data: org } = await client.models.Organization.get({ orgID: user.orgID })
         setOrgInfo(org)
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error)
+      console.error('Error:', error)
     } finally {
       setLoading(false)
     }
@@ -64,7 +56,10 @@ export function Dashboard() {
     return (
       <MainLayout onSignOut={signOut}>
         <div className="flex items-center justify-center h-full">
-          <p className="text-white text-xl">Loading...</p>
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-white text-lg">Loading dashboard...</p>
+          </div>
         </div>
       </MainLayout>
     )
@@ -72,94 +67,105 @@ export function Dashboard() {
 
   return (
     <MainLayout onRefresh={fetchDashboardData} onSignOut={signOut}>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">Dashboard</h1>
           {orgInfo && (
             <p className="text-gray-400">
-              Organization: <span className="text-red-500 font-medium">{orgInfo.orgName}</span>
+              Organization: <span className="text-red-500 font-semibold">{orgInfo.orgName}</span>
             </p>
           )}
         </div>
 
-        {/* Stats Grid - REAL DATA ONLY */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Total Boxes */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-red-500 transition">
+          {/* Total Boxes Card */}
+          <div className="bg-gradient-to-br from-[#1a2454] to-[#111c44] rounded-2xl p-6 border border-gray-800 hover:border-red-600/50 transition-all duration-300 shadow-xl">
             <div className="flex justify-between items-start mb-4">
-              <p className="text-gray-400 text-xs uppercase tracking-wider">Total Boxes</p>
-              <div className="p-3 bg-red-500 bg-opacity-10 rounded-lg">
-                <Package className="w-6 h-6 text-red-500" />
+              <div>
+                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-2">Total Boxes</p>
+                <h3 className="text-4xl font-bold text-white">{stats.boxes}</h3>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-lg">
+                <Package className="w-6 h-6 text-white" />
               </div>
             </div>
-            <h3 className="text-3xl font-bold text-white">{stats.boxes}</h3>
-            <p className="text-gray-400 text-sm mt-2">Inventory items</p>
+            <div className="flex items-center gap-2 text-green-500 text-sm">
+              <TrendingUp className="w-4 h-4" />
+              <span>Inventory items</span>
+            </div>
           </div>
 
-          {/* Total Parts */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-red-500 transition">
+          {/* Total Parts Card */}
+          <div className="bg-gradient-to-br from-[#1a2454] to-[#111c44] rounded-2xl p-6 border border-gray-800 hover:border-red-600/50 transition-all duration-300 shadow-xl">
             <div className="flex justify-between items-start mb-4">
-              <p className="text-gray-400 text-xs uppercase tracking-wider">Total Parts</p>
-              <div className="p-3 bg-red-500 bg-opacity-10 rounded-lg">
-                <Car className="w-6 h-6 text-red-500" />
+              <div>
+                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-2">Total Parts</p>
+                <h3 className="text-4xl font-bold text-white">{stats.parts}</h3>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl shadow-lg">
+                <Car className="w-6 h-6 text-white" />
               </div>
             </div>
-            <h3 className="text-3xl font-bold text-white">{stats.parts}</h3>
-            <p className="text-gray-400 text-sm mt-2">Catalytic converters</p>
+            <p className="text-gray-400 text-sm">Catalytic converters</p>
           </div>
 
-          {/* Active Sales */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-red-500 transition">
+          {/* Active Sales Card */}
+          <div className="bg-gradient-to-br from-[#1a2454] to-[#111c44] rounded-2xl p-6 border border-gray-800 hover:border-red-600/50 transition-all duration-300 shadow-xl">
             <div className="flex justify-between items-start mb-4">
-              <p className="text-gray-400 text-xs uppercase tracking-wider">Active Sales</p>
-              <div className="p-3 bg-red-500 bg-opacity-10 rounded-lg">
-                <Gavel className="w-6 h-6 text-red-500" />
+              <div>
+                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-2">Active Sales</p>
+                <h3 className="text-4xl font-bold text-white">{stats.sales}</h3>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-orange-600 to-orange-700 rounded-xl shadow-lg">
+                <Gavel className="w-6 h-6 text-white" />
               </div>
             </div>
-            <h3 className="text-3xl font-bold text-white">{stats.sales}</h3>
-            <p className="text-gray-400 text-sm mt-2">In marketplace</p>
+            <p className="text-gray-400 text-sm">In marketplace</p>
           </div>
 
-          {/* Revenue Placeholder */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-red-500 transition">
+          {/* Revenue Card */}
+          <div className="bg-gradient-to-br from-[#1a2454] to-[#111c44] rounded-2xl p-6 border border-gray-800 hover:border-red-600/50 transition-all duration-300 shadow-xl">
             <div className="flex justify-between items-start mb-4">
-              <p className="text-gray-400 text-xs uppercase tracking-wider">Revenue</p>
-              <div className="p-3 bg-red-500 bg-opacity-10 rounded-lg">
-                <DollarSign className="w-6 h-6 text-red-500" />
+              <div>
+                <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-2">Revenue</p>
+                <h3 className="text-4xl font-bold text-white">$0.00</h3>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-green-600 to-green-700 rounded-xl shadow-lg">
+                <DollarSign className="w-6 h-6 text-white" />
               </div>
             </div>
-            <h3 className="text-3xl font-bold text-white">$0.00</h3>
-            <p className="text-gray-400 text-sm mt-2">No sales completed</p>
+            <p className="text-gray-400 text-sm">No sales completed</p>
           </div>
         </div>
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Activity - REAL DATA */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-            <h2 className="text-lg font-bold text-white mb-4">Recent Boxes</h2>
+          {/* Recent Boxes */}
+          <div className="bg-gradient-to-br from-[#1a2454] to-[#111c44] rounded-2xl p-6 border border-gray-800 shadow-xl">
+            <h2 className="text-xl font-bold text-white mb-6">Recent Boxes</h2>
             {recentBoxes.length === 0 ? (
-              <div className="text-center py-8">
-                <Package className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400 text-sm">No boxes created yet</p>
+              <div className="text-center py-12">
+                <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-400">No boxes created yet</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {recentBoxes.map((box: any) => (
-                  <div key={box.boxID} className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-750 transition">
-                    <div className="w-2 h-2 rounded-full bg-green-500 mt-2"></div>
+                  <div key={box.boxID} className="flex items-center gap-4 p-4 bg-[#0b1437] rounded-xl hover:bg-gray-800/30 transition-all border border-gray-800">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
                     <div className="flex-1">
-                      <p className="text-sm text-white font-medium">{box.boxName}</p>
+                      <p className="text-white font-semibold text-sm">{box.boxName}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Clock className="w-3 h-3 text-gray-500" />
                         <p className="text-xs text-gray-500">
-                          {box.createdAt ? new Date(box.createdAt).toLocaleDateString() : 'Unknown date'}
+                          {box.createdAt ? new Date(box.createdAt).toLocaleDateString() : 'Unknown'}
                         </p>
                       </div>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      box.status === 'active' ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'
+                    <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
+                      box.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-400'
                     }`}>
                       {box.status}
                     </span>
@@ -169,42 +175,40 @@ export function Dashboard() {
             )}
           </div>
 
-          {/* Active Sales - REAL DATA */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-            <h2 className="text-lg font-bold text-white mb-4">Active Sales</h2>
-            {activeSales.length === 0 ? (
-              <div className="text-center py-8">
-                <Gavel className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400 text-sm">No active sales</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {activeSales.map((sale: any) => (
-                  <div key={sale.saleID} className="p-3 bg-gray-800 rounded-lg hover:bg-gray-750 transition">
-                    <p className="text-sm font-medium text-white mb-2">{sale.title || 'Untitled Sale'}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-400">
-                        {sale.endDate ? new Date(sale.endDate).toLocaleDateString() : 'No end date'}
-                      </span>
-                      <span className="text-sm font-bold text-red-500">
-                        ${sale.currentPrice || '0.00'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+          {/* Quick Actions */}
+          <div className="bg-gradient-to-br from-[#1a2454] to-[#111c44] rounded-2xl p-6 border border-gray-800 shadow-xl">
+            <h2 className="text-xl font-bold text-white mb-6">Quick Actions</h2>
+            <div className="space-y-3">
+              <button className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-xl transition-all text-left shadow-lg">
+                <Package className="w-6 h-6 text-white" />
+                <div>
+                  <p className="text-white font-semibold">Create New Box</p>
+                  <p className="text-red-200 text-xs">Add inventory items</p>
+                </div>
+              </button>
+              <button className="w-full flex items-center gap-4 p-4 bg-[#0b1437] hover:bg-gray-800/50 rounded-xl transition-all text-left border border-gray-800">
+                <Gavel className="w-6 h-6 text-gray-400" />
+                <div>
+                  <p className="text-white font-semibold">Create Auction</p>
+                  <p className="text-gray-400 text-xs">List items for sale</p>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Empty State Helper */}
+        {/* Empty State */}
         {stats.boxes === 0 && stats.parts === 0 && stats.sales === 0 && (
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
-            <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">Get Started</h3>
-            <p className="text-gray-400 mb-4">Start by creating your first inventory box</p>
-            <button className="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-2 rounded-lg transition">
-              Create Box
+          <div className="bg-gradient-to-br from-[#1a2454] to-[#111c44] rounded-2xl p-12 text-center border border-gray-800 shadow-xl">
+            <div className="w-20 h-20 bg-gradient-to-br from-red-600 to-red-700 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <Package className="w-10 h-10 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-3">Welcome to SMASH</h3>
+            <p className="text-gray-400 mb-6 max-w-md mx-auto">
+              Get started by creating your first inventory box to begin managing your scrap materials.
+            </p>
+            <button className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-xl transition-all shadow-lg">
+              Create First Box
             </button>
           </div>
         )}
