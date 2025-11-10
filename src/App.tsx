@@ -28,7 +28,6 @@ function AuthenticatedApp({ user, signOut }: { user: any, signOut: any }) {
   const client = generateClient<Schema>()
 
   useEffect(() => {
-    // Create User record in DynamoDB on first login
     async function ensureUserRecord() {
       try {
         const { data: existingUser } = await client.models.User.get({ 
@@ -43,30 +42,47 @@ function AuthenticatedApp({ user, signOut }: { user: any, signOut: any }) {
             role: 'Buyer',
             status: 'active'
           })
-          console.log('✅ User record created in DynamoDB')
+          console.log('✅ User record created')
         }
       } catch (error) {
-        console.error('Error ensuring user record:', error)
+        console.error('Error creating user record:', error)
       }
     }
 
-    ensureUserRecord()
-  }, [user.userId])
+    if (user?.userId) {
+      ensureUserRecord()
+    }
+  }, [user?.userId])
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/boxes" element={<Boxes />} />
-        <Route path="/boxes/:boxId" element={<BoxDetails />} />
-        <Route path="/parts" element={<Parts />} />
-        <Route path="/marketplace" element={<Marketplace />} />
-        <Route path="/marketplace/:saleId" element={<MarketplaceListing />} />
-        <Route path="/sales/:saleId" element={<SaleDetails />} />
-        <Route path="/organizations" element={<Organizations />} />
-      </Routes>
-    </Router>
+    <div className="min-h-screen bg-black">
+      {/* Top Navigation Bar */}
+      <nav className="bg-gray-900 border-b border-gray-800 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-red-600">SMASH SCRAP</h1>
+          <button
+            onClick={signOut}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition"
+          >
+            Sign Out
+          </button>
+        </div>
+      </nav>
+
+      <Router>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/boxes" element={<Boxes />} />
+          <Route path="/boxes/:boxId" element={<BoxDetails />} />
+          <Route path="/parts" element={<Parts />} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/marketplace/:saleId" element={<MarketplaceListing />} />
+          <Route path="/sales/:saleId" element={<SaleDetails />} />
+          <Route path="/organizations" element={<Organizations />} />
+        </Routes>
+      </Router>
+    </div>
   )
 }
 
