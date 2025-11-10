@@ -264,6 +264,8 @@ const schema = a.schema({
       sale: a.belongsTo('Sale', 'saleID'),
       buyerID: a.id(),
       buyer: a.belongsTo('User', 'buyerID'),
+          orgID: a.id(),
+          organization: a.belongsTo('Organization', 'orgID'),
       
       bidAmount: a.float(),
       bidCurrency: a.string(),
@@ -297,6 +299,8 @@ const schema = a.schema({
       sale: a.belongsTo('Sale', 'saleID'),
       buyerID: a.id(),
       buyer: a.belongsTo('User', 'buyerID'),
+          orgID: a.id(),
+          organization: a.belongsTo('Organization', 'orgID'),
       
       acceptedAt: a.datetime(),
       ipAddress: a.string(),
