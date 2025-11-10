@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { generateClient } from 'aws-amplify/data'
 import type { Schema } from '../../amplify/data/resource'
 
-const client = generateClient<Schema>()
-
 interface Sale {
   saleID: string
   listingTitle: string
@@ -17,6 +15,7 @@ interface Sale {
 }
 
 export function Marketplace() {
+  const client = generateClient<Schema>()
   const navigate = useNavigate()
   const [sales, setSales] = useState<Sale[]>([])
   const [loading, setLoading] = useState(true)
@@ -60,7 +59,6 @@ export function Marketplace() {
           <p className="text-gray-400">Browse active auctions and place bids</p>
         </div>
 
-        {/* Search */}
         <div className="mb-6">
           <input
             type="text"
@@ -73,7 +71,6 @@ export function Marketplace() {
 
         <p className="text-gray-400 mb-6">Showing {filtered.length} active listings</p>
 
-        {/* Listings Grid */}
         {filtered.length === 0 ? (
           <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 p-12 text-center">
             <p className="text-gray-400 text-lg">No active listings at the moment. Check back soon!</p>
