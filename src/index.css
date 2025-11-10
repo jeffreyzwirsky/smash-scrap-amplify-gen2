@@ -2,35 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
+/* Root element styling - CRITICAL FIXES */
+html {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-html, body, #root {
-  height: 100%;
   width: 100%;
-  overflow: hidden;
+  min-height: 100vh;
+  /* REMOVED: overflow: hidden; - This was preventing scrolling */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background-color: #0b1437; /* CHANGED from #000000 to match Tailwind */
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  background-color: #000000;
-  color: #ffffff;
+#root {
+  width: 100%;
+  min-height: 100vh;
+  /* REMOVED: overflow: hidden; */
+  /* REMOVED: height: 100%; */
+  display: flex;
+  flex-direction: column;
 }
 
-/* Custom scrollbar */
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Scrollbar styling for dark theme */
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #111213;
+  background: #0b1437;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2d2e32;
+  background: #1e3a8a;
   border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
+/* Remove default button styling */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
