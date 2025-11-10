@@ -1,3 +1,6 @@
+# SaleDetails.tsx (Black Theme with Red Buttons)
+
+```typescript
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { generateClient } from 'aws-amplify/data'
@@ -11,12 +14,10 @@ interface Sale {
   listingDescription?: string
   auctionType: string
   status: string
+  currentBid?: number
   startingPrice?: number
   reservePrice?: number
-  currentBid?: number
-  startTime?: string
   endTime?: string
-  boxID?: string
 }
 
 interface Bid {
@@ -25,7 +26,6 @@ interface Bid {
   bidAmount: number
   bidStatus: string
   submittedAt?: string
-  buyer?: any
 }
 
 export function SaleDetails() {
@@ -45,9 +45,9 @@ export function SaleDetails() {
       setSale(saleData as Sale)
 
       const { data: bidsData } = await client.models.Bid.list({
-        filter: { saleID: { eq: saleId! } }
+        filter: { saleID: { eq: saleId } }
       })
-      setBids(bidsData as Bid[])
+      setBids((bidsData as Bid[]).sort((a, b) => b.bidAmount - a.bidAmount))
     } catch (error) {
       console.error('Error fetching sale details:', error)
     } finally {
@@ -55,160 +55,123 @@ export function SaleDetails() {
     }
   }
 
-  async function activateSale() {
-    if (!sale) return
-    try {
-      await client.models.Sale.update({
-        saleID: sale.saleID,
-        status: 'active',
-      })
-      alert('Sale activated!')
-      fetchSaleDetails()
-    } catch (error) {
-      console.error('Error activating sale:', error)
-      alert('Failed to activate sale')
-    }
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <p className="text-white text-xl">Loading sale details...</p>
+      </div>
+    )
   }
 
-  async function closeSale() {
-    if (!sale) return
-    if (!window.confirm('Close this sale? This will end bidding.')) return
-
-    try {
-      const winningBid = bids.reduce((max, bid) => 
-        bid.bidAmount > (max?.bidAmount || 0) ? bid : max
-      , null as Bid | null)
-
-      await client.models.Sale.update({
-        saleID: sale.saleID,
-        status: 'closed',
-        winningBidID: winningBid?.bidID,
-        winningBuyerID: winningBid?.buyerID,
-        closedAt: new Date().toISOString(),
-      })
-
-      if (winningBid) {
-        await client.models.Bid.update({
-          bidID: winningBid.bidID,
-          bidStatus: 'accepted',
-        })
-      }
-
-      alert('Sale closed successfully!')
-      fetchSaleDetails()
-    } catch (error) {
-      console.error('Error closing sale:', error)
-      alert('Failed to close sale')
-    }
+  if (!sale) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <p className="text-white text-xl">Sale not found</p>
+      </div>
+    )
   }
-
-  if (loading) return <div className="p-8">Loading...</div>
-  if (!sale) return <div className="p-8">Sale not found</div>
-
-  const sortedBids = [...bids].sort((a, b) => b.bidAmount - a.bidAmount)
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <button
-            onClick={() => navigate('/sales')}
-            className="text-blue-600 hover:text-blue-800 mb-2"
-          >
-            ← Back to Sales
-          </button>
-          <h1 className="text-3xl font-bold">{sale.listingTitle}</h1>
-          <p className="text-gray-600">Status: {sale.status} | Type: {sale.auctionType}</p>
+    <div className="min-h-screen bg-black text-white p-6">
+      <button
+        onClick={() => navigate('/sales')}
+        className="text-red-500 hover:text-red-400 mb-6 flex items-center gap-2"
+      >
+        ← Back to Sales
+      </button>
+
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-white mb-2">{sale.listingTitle}</h1>
+        <p className="text-gray-400">
+          Status: {sale.status} | Type: {sale.auctionType}
+        </p>
+      </div>
+
+      {/* Sale Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-800">
+          <p className="text-gray-400 text-sm mb-2">Current Bid</p>
+          <p className="text-2xl font-bold text-red-500">
+            ${sale.currentBid?.toFixed(2) || '0.00'}
+          </p>
         </div>
-        <div className="flex gap-3">
-          {sale.status === 'draft' && (
-            <button
-              onClick={activateSale}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            >
-              Activate Sale
-            </button>
-          )}
-          {sale.status === 'active' && (
-            <button
-              onClick={closeSale}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-            >
-              Close Sale
-            </button>
-          )}
+        <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-800">
+          <p className="text-gray-400 text-sm mb-2">Starting Price</p>
+          <p className="text-2xl font-bold text-white">
+            ${sale.startingPrice?.toFixed(2) || '0.00'}
+          </p>
+        </div>
+        <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-800">
+          <p className="text-gray-400 text-sm mb-2">Reserve Price</p>
+          <p className="text-2xl font-bold text-white">
+            ${sale.reservePrice?.toFixed(2) || 'None'}
+          </p>
+        </div>
+        <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-800">
+          <p className="text-gray-400 text-sm mb-2">Total Bids</p>
+          <p className="text-2xl font-bold text-white">{bids.length}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm text-gray-500 mb-1">Current Bid</h3>
-          <p className="text-2xl font-bold">${sale.currentBid?.toFixed(2) || '0.00'}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm text-gray-500 mb-1">Starting Price</h3>
-          <p className="text-2xl font-bold">${sale.startingPrice?.toFixed(2) || '0.00'}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm text-gray-500 mb-1">Reserve Price</h3>
-          <p className="text-2xl font-bold">${sale.reservePrice?.toFixed(2) || 'None'}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm text-gray-500 mb-1">Total Bids</h3>
-          <p className="text-2xl font-bold">{bids.length}</p>
-        </div>
-      </div>
-
+      {/* Description */}
       {sale.listingDescription && (
-        <div className="bg-white p-6 rounded-lg shadow mb-8">
-          <h2 className="text-xl font-bold mb-2">Description</h2>
-          <p className="text-gray-700">{sale.listingDescription}</p>
+        <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 p-6 mb-6">
+          <h2 className="text-xl font-bold text-white mb-3">Description</h2>
+          <p className="text-gray-300">{sale.listingDescription}</p>
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-bold">Bids ({bids.length})</h2>
+      {/* Bids Table */}
+      <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-800">
+          <h2 className="text-xl font-bold text-white">Bids</h2>
         </div>
         {bids.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            No bids submitted yet.
+          <div className="px-6 py-12 text-center">
+            <p className="text-gray-400">No bids yet.</p>
           </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rank</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buyer ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bid Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Submitted</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {sortedBids.map((bid, index) => (
-                <tr key={bid.bidID}>
-                  <td className="px-6 py-4">#{index + 1}</td>
-                  <td className="px-6 py-4">{bid.buyerID}</td>
-                  <td className="px-6 py-4 font-bold">${bid.bidAmount.toFixed(2)}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      bid.bidStatus === 'accepted' ? 'bg-green-100 text-green-800' :
-                      bid.bidStatus === 'rejected' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {bid.bidStatus}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    {bid.submittedAt ? new Date(bid.submittedAt).toLocaleString() : 'N/A'}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-800">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Rank</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Buyer ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Bid Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Submitted</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-800">
+                {bids.map((bid, index) => (
+                  <tr key={bid.bidID} className="hover:bg-gray-800 transition">
+                    <td className="px-6 py-4 text-sm text-white">#{index + 1}</td>
+                    <td className="px-6 py-4 text-sm text-white">{bid.buyerID}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`font-bold ${index === 0 ? 'text-red-500' : 'text-white'}`}>
+                        ${bid.bidAmount.toFixed(2)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`px-2 py-1 rounded ${
+                        bid.bidStatus === 'accepted' ? 'bg-green-900 text-green-300' :
+                        bid.bidStatus === 'rejected' ? 'bg-red-900 text-red-300' :
+                        'bg-yellow-900 text-yellow-300'
+                      }`}>
+                        {bid.bidStatus}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-white">
+                      {bid.submittedAt ? new Date(bid.submittedAt).toLocaleString() : 'N/A'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
   )
 }
+```

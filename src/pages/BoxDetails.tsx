@@ -1,7 +1,10 @@
+# BoxDetails.tsx (Black Theme with Red Buttons)
+
+```typescript
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { generateClient } from 'aws-amplify/data'
-import type { Schema } from '../../amplify/data/resource'
+import type { Schema } from '../../../amplify/data/resource'
 import { uploadData } from 'aws-amplify/storage'
 
 const client = generateClient<Schema>()
@@ -47,7 +50,7 @@ export function BoxDetails() {
       setBox(boxData as Box)
 
       const { data: partsData } = await client.models.Part.list({
-        filter: { boxID: { eq: boxId! } }
+        filter: { boxID: { eq: boxId } }
       })
       setParts(partsData as Part[])
     } catch (error) {
@@ -59,17 +62,13 @@ export function BoxDetails() {
 
   async function finalizeBox() {
     if (!box) return
-    
-    if (!window.confirm('Finalize this box? Once finalized, you cannot add more parts.')) {
-      return
-    }
+    if (!confirm('Finalize this box? This cannot be undone.')) return
 
     try {
       await client.models.Box.update({
         boxID: box.boxID,
-        status: 'finalized',
         isFinalized: true,
-        finalizedAt: new Date().toISOString(),
+        status: 'finalized'
       })
       alert('Box finalized successfully!')
       fetchBoxDetails()
@@ -79,105 +78,121 @@ export function BoxDetails() {
     }
   }
 
-  if (loading) return <div className="p-8">Loading...</div>
-  if (!box) return <div className="p-8">Box not found</div>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <p className="text-white text-xl">Loading box details...</p>
+      </div>
+    )
+  }
+
+  if (!box) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <p className="text-white text-xl">Box not found</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <button
-            onClick={() => navigate('/boxes')}
-            className="text-blue-600 hover:text-blue-800 mb-2"
-          >
-            ← Back to Boxes
-          </button>
-          <h1 className="text-3xl font-bold">{box.boxNumber}</h1>
-          <p className="text-gray-600">Status: {box.status}</p>
+    <div className="min-h-screen bg-black text-white p-6">
+      <button
+        onClick={() => navigate('/boxes')}
+        className="text-red-500 hover:text-red-400 mb-6 flex items-center gap-2"
+      >
+        ← Back to Boxes
+      </button>
+
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-white mb-2">Box {box.boxNumber}</h1>
+        <p className="text-gray-400">Status: {box.status}</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-800">
+          <p className="text-gray-400 text-sm mb-2">Material Type</p>
+          <p className="text-2xl font-bold text-white">{box.materialType || 'Not set'}</p>
         </div>
-        <div className="flex gap-3">
-          {box.status !== 'finalized' && (
-            <button
-              onClick={() => setShowAddPart(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            >
-              + Add Part
-            </button>
-          )}
-          {box.status !== 'finalized' && parts.length > 0 && (
-            <button
-              onClick={finalizeBox}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
-            >
-              Finalize Box
-            </button>
-          )}
+        <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-800">
+          <p className="text-gray-400 text-sm mb-2">Net Weight (lb)</p>
+          <p className="text-2xl font-bold text-white">{box.netWeightLb?.toFixed(2) || '0.00'}</p>
+        </div>
+        <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-800">
+          <p className="text-gray-400 text-sm mb-2">Parts Count</p>
+          <p className="text-2xl font-bold text-white">{parts.length}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm text-gray-500 mb-1">Material Type</h3>
-          <p className="text-xl font-bold">{box.materialType || 'Not set'}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm text-gray-500 mb-1">Net Weight (lb)</h3>
-          <p className="text-xl font-bold">{box.netWeightLb?.toFixed(2) || '0.00'}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm text-gray-500 mb-1">Parts Count</h3>
-          <p className="text-xl font-bold">{parts.length}</p>
-        </div>
+      {/* Actions */}
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={() => setShowAddPart(true)}
+          disabled={box.isFinalized}
+          className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg shadow-lg transition"
+        >
+          Add Part
+        </button>
+        <button
+          onClick={finalizeBox}
+          disabled={box.isFinalized || parts.length === 0}
+          className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg shadow-lg transition"
+        >
+          {box.isFinalized ? 'Finalized' : 'Finalize Box'}
+        </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-bold">Parts in This Box</h2>
+      {/* Parts Table */}
+      <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-800">
+          <h2 className="text-xl font-bold text-white">Parts in this Box</h2>
         </div>
         {parts.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            No parts added yet. Click "Add Part" to get started.
+          <div className="px-6 py-12 text-center">
+            <p className="text-gray-400">No parts added yet. Add your first part above!</p>
           </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Part #</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fill Level</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Weight (lb)</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Images</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {parts.map((part) => (
-                <tr key={part.partID}>
-                  <td className="px-6 py-4">{part.partNumber}</td>
-                  <td className="px-6 py-4">{part.partName}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      part.fillLevel === 'full' ? 'bg-green-100 text-green-800' :
-                      part.fillLevel === 'partial' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {part.fillLevel}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">{part.weightLb?.toFixed(2) || 'N/A'}</td>
-                  <td className="px-6 py-4">{part.images?.length || 0}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-800">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Part #</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Fill Level</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Weight (lb)</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Images</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-800">
+                {parts.map((part) => (
+                  <tr key={part.partID} className="hover:bg-gray-800 transition">
+                    <td className="px-6 py-4 text-sm text-white">{part.partNumber}</td>
+                    <td className="px-6 py-4 text-sm text-white">{part.partName}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`px-2 py-1 rounded ${
+                        part.fillLevel === 'full' ? 'bg-green-900 text-green-300' :
+                        part.fillLevel === 'partial' ? 'bg-yellow-900 text-yellow-300' :
+                        'bg-red-900 text-red-300'
+                      }`}>
+                        {part.fillLevel}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-white">{part.weightLb?.toFixed(2) || 'N/A'}</td>
+                    <td className="px-6 py-4 text-sm text-white">{part.images?.length || 0}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
+      {/* Add Part Modal */}
       {showAddPart && (
         <AddPartModal
-          boxId={boxId!}
-          orgId={box.orgID!}
+          boxId={box.boxID}
           onClose={() => setShowAddPart(false)}
-          onCreated={() => {
+          onSuccess={() => {
             setShowAddPart(false)
             fetchBoxDetails()
           }}
@@ -187,87 +202,66 @@ export function BoxDetails() {
   )
 }
 
-function AddPartModal({ boxId, orgId, onClose, onCreated }: {
-  boxId: string
-  orgId: string
-  onClose: () => void
-  onCreated: () => void
-}) {
+function AddPartModal({ boxId, onClose, onSuccess }: { boxId: string, onClose: () => void, onSuccess: () => void }) {
   const [partNumber, setPartNumber] = useState('')
   const [partName, setPartName] = useState('')
-  const [fillLevel, setFillLevel] = useState('full')
-  const [weightLb, setWeightLb] = useState('')
-  const [images, setImages] = useState<File[]>([])
-  const [creating, setCreating] = useState(false)
+  const [fillLevel, setFillLevel] = useState('empty')
+  const [weight, setWeight] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setCreating(true)
+    setSubmitting(true)
 
     try {
-      const imageKeys: string[] = []
-      for (const file of images) {
-        const key = `parts/${boxId}/${Date.now()}-${file.name}`
-        await uploadData({
-          path: key,
-          data: file,
-        }).result
-        imageKeys.push(key)
-      }
-
       await client.models.Part.create({
+        boxID: boxId,
         partNumber,
         partName,
         fillLevel,
-        weightLb: parseFloat(weightLb) || undefined,
-        weightKg: parseFloat(weightLb) ? parseFloat(weightLb) * 0.453592 : undefined,
-        boxID: boxId,
-        orgID: orgId,
-        images: imageKeys,
-        imagesCount: imageKeys.length,
-        status: 'active',
+        weightLb: weight ? parseFloat(weight) : undefined,
       })
-
-      onCreated()
+      alert('Part added successfully!')
+      onSuccess()
     } catch (error) {
-      console.error('Error creating part:', error)
-      alert('Failed to create part')
+      console.error('Error adding part:', error)
+      alert('Failed to add part')
     } finally {
-      setCreating(false)
+      setSubmitting(false)
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-4">Add Part</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+      <div className="bg-gray-900 rounded-lg shadow-2xl p-8 max-w-md w-full border border-gray-800">
+        <h2 className="text-2xl font-bold text-white mb-6">Add New Part</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Part Number *</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Part Number</label>
             <input
               type="text"
-              required
               value={partNumber}
               onChange={(e) => setPartNumber(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded"
+              required
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-red-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Part Name *</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Part Name</label>
             <input
               type="text"
-              required
               value={partName}
               onChange={(e) => setPartName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded"
+              required
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-red-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Fill Level *</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Fill Level</label>
             <select
               value={fillLevel}
               onChange={(e) => setFillLevel(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded"
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-red-500"
             >
               <option value="empty">Empty</option>
               <option value="partial">Partial</option>
@@ -275,49 +269,29 @@ function AddPartModal({ boxId, orgId, onClose, onCreated }: {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Weight (lb)</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Weight (lb) - Optional</label>
             <input
               type="number"
               step="0.01"
-              value={weightLb}
-              onChange={(e) => setWeightLb(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-red-500"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Images (up to 10)</label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => {
-                const files = Array.from(e.target.files || [])
-                if (files.length > 10) {
-                  alert('Maximum 10 images allowed')
-                  return
-                }
-                setImages(files)
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded"
-            />
-            {images.length > 0 && (
-              <p className="text-sm text-gray-500 mt-1">{images.length} image(s) selected</p>
-            )}
-          </div>
-          <div className="flex gap-3 mt-6">
+          <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+              className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={creating}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded disabled:bg-gray-400"
+              disabled={submitting}
+              className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition"
             >
-              {creating ? 'Adding...' : 'Add Part'}
+              {submitting ? 'Adding...' : 'Add Part'}
             </button>
           </div>
         </form>
@@ -325,3 +299,4 @@ function AddPartModal({ boxId, orgId, onClose, onCreated }: {
     </div>
   )
 }
+```
