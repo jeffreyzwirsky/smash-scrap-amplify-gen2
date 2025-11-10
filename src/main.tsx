@@ -5,13 +5,8 @@ import './index.css'
 import { Amplify } from 'aws-amplify'
 import outputs from '../amplify_outputs.json'
 
-// Configure Amplify before rendering
-try {
-  Amplify.configure(outputs)
-  console.log('✅ Amplify configured successfully')
-} catch (error) {
-  console.error('❌ Failed to configure Amplify:', error)
-}
+// Configure Amplify
+Amplify.configure(outputs)
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
