@@ -46,7 +46,6 @@ export const auth = defineAuth({
   // Account recovery settings
   accountRecovery: 'EMAIL_ONLY',
 
-  // Password policy
   passwordPolicy: {
     minLength: 8,
     requireLowercase: true,
@@ -54,4 +53,7 @@ export const auth = defineAuth({
     requireNumbers: true,
     requireSymbols: true,
   },
-});
+})
+
+  // Password policy
+  ;
