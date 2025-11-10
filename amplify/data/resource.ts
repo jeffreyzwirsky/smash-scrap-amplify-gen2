@@ -1,37 +1,11 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 
-/*== SMASH SCRAP - COMPLETE DATABASE SCHEMA ==
- * 
- * This schema defines 9 tables for the SMASH SCRAP inventory management system:
- * 1. Organizations - Multi-tenant organization data
- * 2. Users - User profiles with role-based access
- * 3. Boxes - Container/package inventory
- * 4. Parts - Individual parts within boxes
- * 5. Sales - Marketplace listings and auctions
- * 6. Bids - Buyer bids on sales
- * 7. TermsAcceptance - Track buyer acceptance of sale terms
-  * 8. UserModule - Module permissions per user
-   * 9. OrganizationModule - Module permissions per organization
- * 
- * Features:
- * - Multi-tenant isolation via orgID
- * - Role-based authorization (SuperAdmin, SellerAdmin, YardOperator, Buyer, Inspector)
- * - Relationships between entities
- * - Sealed and open auction support
- * - Image storage references (S3)
- * - Weight calculations (lb/kg)
- * - Status tracking and audit trails
- */
-
 const schema = a.schema({
   
-  // ============================================
-  // ORGANIZATIONS TABLE
-  // ============================================
   Organization: a
     .model({
       orgID: a.id(),
-      orgName: a.string(),
+      orgName: a.string().required(),
       address: a.string(),
       city: a.string(),
       province: a.string(),
@@ -44,28 +18,25 @@ const schema = a.schema({
       settings: a.json(),
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
-          users: a.hasMany('User', 'orgID'),
-          boxes: a.hasMany('Box', 'orgID'),
-          parts: a.hasMany('Part', 'orgID'),
-          sales: a.hasMany('Sale', 'orgID'),
-          bids: a.hasMany('Bid', 'orgID'),
-          termsAcceptances: a.hasMany('TermsAcceptance', 'orgID'),
-               orgModules: a.hasMany('OrganizationModule', 'orgID'),
+      users: a.hasMany('User', 'orgID'),
+      boxes: a.hasMany('Box', 'orgID'),
+      parts: a.hasMany('Part', 'orgID'),
+      sales: a.hasMany('Sale', 'orgID'),
+      bids: a.hasMany('Bid', 'orgID'),
+      termsAcceptances: a.hasMany('TermsAcceptance', 'orgID'),
+      orgModules: a.hasMany('OrganizationModule', 'orgID'),
     })
+    .identifier(['orgID'])
     .authorization((allow) => [
       allow.authenticated(),
       allow.group('SuperAdmin'),
-
     ]),
 
-  // ============================================
-  // USERS TABLE
-  // ============================================
   User: a
     .model({
       userID: a.id(),
       cognitoID: a.string(),
-      email: a.email(),
+      email: a.email().required(),
       displayName: a.string(),
       firstName: a.string(),
       lastName: a.string(),
@@ -75,31 +46,28 @@ const schema = a.schema({
       organization: a.belongsTo('Organization', 'orgID'),
       status: a.enum(['active', 'inactive', 'suspended']),
       permissions: a.json(),
-          themePreference: a.enum(['dark', 'light', 'system']),
+      themePreference: a.enum(['dark', 'light', 'system']),
       lastLoginAt: a.datetime(),
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
-            soldBoxes: a.hasMany('Box', 'sellerID'),
-            soldParts: a.hasMany('Part', 'sellerID'),
-            createdSales: a.hasMany('Sale', 'sellerID'),
-            placedBids: a.hasMany('Bid', 'buyerID'),
-            acceptedTerms: a.hasMany('TermsAcceptance', 'buyerID'),
-               userModules: a.hasMany('UserModule', 'userID'),
+      soldBoxes: a.hasMany('Box', 'sellerID'),
+      soldParts: a.hasMany('Part', 'sellerID'),
+      createdSales: a.hasMany('Sale', 'sellerID'),
+      placedBids: a.hasMany('Bid', 'buyerID'),
+      acceptedTerms: a.hasMany('TermsAcceptance', 'buyerID'),
+      userModules: a.hasMany('UserModule', 'userID'),
     })
+    .identifier(['userID'])
     .authorization((allow) => [
       allow.owner(),
       allow.group('SuperAdmin'),
-
       allow.group('SellerAdmin').to(['read', 'update']),
     ]),
 
-  // ============================================
-  // BOXES TABLE (Packages/Containers)
-  // ============================================
   Box: a
     .model({
       boxID: a.id(),
-      orgID: a.id(),
+      orgID: a.id().required(),
       organization: a.belongsTo('Organization', 'orgID'),
       sellerID: a.id(),
       seller: a.belongsTo('User', 'sellerID'),
@@ -107,93 +75,34 @@ const schema = a.schema({
       status: a.enum(['draft', 'in_progress', 'finalized', 'listed', 'sold']),
       location: a.string(),
       materialType: a.enum(['aluminum', 'copper', 'brass', 'stainless', 'steel', 'mixed']),
-      
-      // Dimensions
       length: a.float(),
       width: a.float(),
       height: a.float(),
       dimensionUnit: a.enum(['inches', 'cm']),
-      
-      // Weights (lb is authoritative, kg is derived)
       grossWeightLb: a.float(),
       tareWeightLb: a.float(),
       netWeightLb: a.float(),
       grossWeightKg: a.float(),
       tareWeightKg: a.float(),
       netWeightKg: a.float(),
-      
-      // Finalization tracking
       isFinalized: a.boolean(),
       finalizedAt: a.datetime(),
       finalizedBy: a.id(),
-      finalizeRecord: a.json(), // Stores finalization audit data
-      
-      // Images (up to 10)
-      images: a.string().array(), // Array of S3 keys
+      finalizeRecord: a.json(),
+      images: a.string().array(),
       imagesCount: a.integer(),
-      
-      // Part tracking
       partsCount: a.integer(),
       parts: a.hasMany('Part', 'boxID'),
-            sale: a.hasOne('Sale', 'boxID'),
-      
+      sale: a.hasOne('Sale', 'boxID'),
       notes: a.string(),
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
       createdBy: a.id(),
       updatedBy: a.id(),
     })
+    .identifier(['boxID'])
     .authorization((allow) => [
       allow.group('SuperAdmin'),
-      // Org isolation: only members of the org can access
-// TODO: Add org isolation - allow.ownerDefinedIn('orgID') after Cognito custom:orgID claim configured
-      allow.group('SellerAdmin').to(['read', 'create', 'update', 'delete']),
-      allow.group('YardOperator').to(['read', 'create', 'update']),
-      allow.group('Inspector').to(['read']),
-      allow.publicApiKey().to(['read']), // For marketplace viewing
-    ]),
-
-  // ============================================
-  // PARTS TABLE
-  // ============================================
-  Part: a
-    .model({
-      partID: a.id(),
-      boxID: a.id(),
-      box: a.belongsTo('Box', 'boxID'),
-      orgID: a.id(),
-      organization: a.belongsTo('Organization', 'orgID'),
-      sellerID: a.id(),
-      seller: a.belongsTo('User', 'sellerID'),
-      
-      partNumber: a.string(),
-      partName: a.string(),
-      partType: a.string(),
-      materialType: a.enum(['aluminum', 'copper', 'brass', 'stainless', 'steel', 'mixed']),
-      
-      // Weight
-      weightLb: a.float(),
-      weightKg: a.float(),
-      
-      // Fill level (required)
-      fillLevel: a.enum(['empty', 'partial', 'full']),
-      
-      // Images (up to 10, at least 1 required)
-      images: a.string().array(),
-      imagesCount: a.integer(),
-      
-      // Status
-      status: a.enum(['draft', 'active', 'removed']),
-      
-      description: a.string(),
-      notes: a.string(),
-      createdAt: a.datetime(),
-      updatedAt: a.datetime(),
-      addedBy: a.id(),
-    })
-    .authorization((allow) => [
-      allow.group('SuperAdmin'),
-           // Org isolation: users can only access parts in their organization
       allow.ownerDefinedIn('orgID'),
       allow.group('SellerAdmin').to(['read', 'create', 'update', 'delete']),
       allow.group('YardOperator').to(['read', 'create', 'update']),
@@ -201,72 +110,83 @@ const schema = a.schema({
       allow.publicApiKey().to(['read']),
     ]),
 
-  // ============================================
-  // SALES TABLE (Marketplace Listings)
-  // ============================================
+  Part: a
+    .model({
+      partID: a.id(),
+      boxID: a.id().required(),
+      box: a.belongsTo('Box', 'boxID'),
+      orgID: a.id().required(),
+      organization: a.belongsTo('Organization', 'orgID'),
+      sellerID: a.id(),
+      seller: a.belongsTo('User', 'sellerID'),
+      partNumber: a.string(),
+      partName: a.string(),
+      partType: a.string(),
+      materialType: a.enum(['aluminum', 'copper', 'brass', 'stainless', 'steel', 'mixed']),
+      weightLb: a.float(),
+      weightKg: a.float(),
+      fillLevel: a.enum(['empty', 'partial', 'full']),
+      images: a.string().array(),
+      imagesCount: a.integer(),
+      status: a.enum(['draft', 'active', 'removed']),
+      description: a.string(),
+      notes: a.string(),
+      createdAt: a.datetime(),
+      updatedAt: a.datetime(),
+      addedBy: a.id(),
+    })
+    .identifier(['partID'])
+    .authorization((allow) => [
+      allow.group('SuperAdmin'),
+      allow.ownerDefinedIn('orgID'),
+      allow.group('SellerAdmin').to(['read', 'create', 'update', 'delete']),
+      allow.group('YardOperator').to(['read', 'create', 'update']),
+      allow.group('Inspector').to(['read']),
+      allow.publicApiKey().to(['read']),
+    ]),
+
   Sale: a
     .model({
       saleID: a.id(),
       boxID: a.id(),
       box: a.belongsTo('Box', 'boxID'),
-      orgID: a.id(),
+      orgID: a.id().required(),
       organization: a.belongsTo('Organization', 'orgID'),
       sellerID: a.id(),
       seller: a.belongsTo('User', 'sellerID'),
-      
-      // Sale details
       listingTitle: a.string(),
       listingDescription: a.string(),
-      
-      // Auction type and rules
       auctionType: a.enum(['sealed', 'open']),
-      
-      // Pricing
       startingPrice: a.float(),
       reservePrice: a.float(),
       currentBid: a.float(),
       bidCurrency: a.string(),
-      minBidIncrement: a.float(), // For open auctions
-      
-      // Timing
+      minBidIncrement: a.float(),
       startTime: a.datetime(),
       endTime: a.datetime(),
       bidDueAt: a.datetime(),
-      
-      // Auction controls
       autoClose: a.boolean(),
       manualClose: a.boolean(),
-      acceptManualOverride: a.boolean(), // Allow SellerAdmin to accept bid before deadline
-      antiSnipingEnabled: a.boolean(), // Extend deadline if last-minute bid
+      acceptManualOverride: a.boolean(),
+      antiSnipingEnabled: a.boolean(),
       antiSnipingMinutes: a.integer(),
-      
-      // Status
-// GSI for scheduled bid closer: query by status + bidDueAt
-            status: a.enum(['draft', 'active', 'closed', 'sold', 'cancelled']),
-      
-      // Winner tracking
+      status: a.enum(['draft', 'active', 'closed', 'sold', 'cancelled']),
       winningBidID: a.id(),
       winningBuyerID: a.id(),
-      
-      // Terms and conditions
       termsText: a.string(),
       requireTermsAcceptance: a.boolean(),
-      
-      // Audit trail
-      bidAuditTrail: a.json(), // Track bid history
-      
+      bidAuditTrail: a.json(),
       bids: a.hasMany('Bid', 'saleID'),
       termsAcceptances: a.hasMany('TermsAcceptance', 'saleID'),
-      
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
       createdBy: a.id(),
       closedAt: a.datetime(),
       closedBy: a.id(),
     })
+    .identifier(['saleID'])
     .authorization((allow) => [
       allow.group('SuperAdmin'),
-           // Org isolation: users can only access sales in their organization
       allow.ownerDefinedIn('orgID'),
       allow.group('SellerAdmin').to(['read', 'create', 'update', 'delete']),
       allow.group('YardOperator').to(['read']),
@@ -274,79 +194,61 @@ const schema = a.schema({
       allow.publicApiKey().to(['read']),
     ]),
 
-  // ============================================
-  // BIDS TABLE
-  // ============================================
   Bid: a
     .model({
       bidID: a.id(),
-      saleID: a.id(),
+      saleID: a.id().required(),
       sale: a.belongsTo('Sale', 'saleID'),
-      buyerID: a.id(),
+      buyerID: a.id().required(),
       buyer: a.belongsTo('User', 'buyerID'),
-          orgID: a.id(),
-          organization: a.belongsTo('Organization', 'orgID'),
-      
+      orgID: a.id().required(),
+      organization: a.belongsTo('Organization', 'orgID'),
       bidAmount: a.float(),
       bidCurrency: a.string(),
-      
       bidStatus: a.enum(['pending', 'accepted', 'rejected', 'outbid']),
-      
       bidType: a.enum(['initial', 'counter', 'auto_increment']),
-      
       notes: a.string(),
-      
       submittedAt: a.datetime(),
       respondedAt: a.datetime(),
-      
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
     })
+    .identifier(['bidID'])
     .authorization((allow) => [
       allow.group('SuperAdmin'),
-           // Org isolation: users can only access bids in their organization
       allow.ownerDefinedIn('orgID'),
       allow.group('SellerAdmin').to(['read', 'update']),
       allow.owner().to(['read', 'create']),
       allow.group('Buyer').to(['read', 'create']),
     ]),
 
-  // ============================================
-  // TERMS ACCEPTANCE TABLE
-  // ============================================
   TermsAcceptance: a
     .model({
       acceptanceID: a.id(),
-      saleID: a.id(),
+      saleID: a.id().required(),
       sale: a.belongsTo('Sale', 'saleID'),
-      buyerID: a.id(),
+      buyerID: a.id().required(),
       buyer: a.belongsTo('User', 'buyerID'),
-          orgID: a.id(),
-          organization: a.belongsTo('Organization', 'orgID'),
-      
+      orgID: a.id().required(),
+      organization: a.belongsTo('Organization', 'orgID'),
       acceptedAt: a.datetime(),
       ipAddress: a.string(),
       userAgent: a.string(),
-      
-      termsVersion: a.string(), // Track which version of terms was accepted
-      
+      termsVersion: a.string(),
       createdAt: a.datetime(),
     })
+    .identifier(['acceptanceID'])
     .authorization((allow) => [
       allow.group('SuperAdmin'),
-           // Org isolation: users can only access terms acceptances in their organization
       allow.ownerDefinedIn('orgID'),
       allow.group('SellerAdmin').to(['read']),
       allow.owner().to(['read', 'create']),
     ]),
 
-    // ============================================
-  // USER MODULES TABLE (Module Permissions per User)
-  // ============================================
   UserModule: a
     .model({
       moduleID: a.id(),
-      userID: a.id(),
+      userID: a.id().required(),
       user: a.belongsTo('User', 'userID'),
       moduleName: a.enum([
         'boxes_management', 'parts_management', 'inventory_reporting', 'photo_upload',
@@ -364,17 +266,15 @@ const schema = a.schema({
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
     })
+    .identifier(['moduleID'])
     .authorization((allow) => [
       allow.group('SuperAdmin'),
     ]),
 
-    // ============================================
-  // ORGANIZATION MODULES TABLE (Module Permissions per Org)
-  // ============================================
   OrganizationModule: a
     .model({
       moduleID: a.id(),
-      orgID: a.id(),
+      orgID: a.id().required(),
       organization: a.belongsTo('Organization', 'orgID'),
       moduleName: a.enum([
         'boxes_management', 'parts_management', 'inventory_reporting', 'photo_upload',
@@ -390,6 +290,7 @@ const schema = a.schema({
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
     })
+    .identifier(['moduleID'])
     .authorization((allow) => [
       allow.group('SuperAdmin'),
     ]),
@@ -407,4 +308,3 @@ export const data = defineData({
     },
   },
 });
-          
