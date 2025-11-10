@@ -3,8 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { generateClient } from 'aws-amplify/data'
 import type { Schema } from '../../amplify/data/resource'
 
-const client = generateClient<Schema>()
-
 interface Sale {
   saleID: string
   listingTitle: string
@@ -26,6 +24,7 @@ interface Bid {
 }
 
 export function SaleDetails() {
+  const client = generateClient<Schema>()
   const { saleId } = useParams()
   const navigate = useNavigate()
   const [sale, setSale] = useState<Sale | null>(null)
@@ -123,11 +122,10 @@ export function SaleDetails() {
           )}
         </div>
 
-        {/* Bids Table */}
         <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-800 flex justify-between items-center">
             <h2 className="text-xl font-bold text-white">Bids</h2>
-            <span className="text-gray-400">Total Bids: {bids.length}</span>
+            <span className="text-gray-400">Total: {bids.length}</span>
           </div>
 
           {bids.length === 0 ? (
