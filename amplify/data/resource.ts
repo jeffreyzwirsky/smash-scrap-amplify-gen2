@@ -60,10 +60,10 @@ const schema = a.schema({
       firstName: a.string(),
       lastName: a.string(),
       phone: a.phone(),
-      role: a.enum(['SuperAdmin', 'SellerAdmin', 'YardOperator', 'Buyer', 'Inspector']).required(),
+      role: a.enum(['SuperAdmin', 'SellerAdmin', 'YardOperator', 'Buyer', 'Inspector']),
       orgID: a.id().required(),
       organization: a.belongsTo('Organization', 'orgID'),
-      status: a.enum(['active', 'inactive', 'suspended']).default('active'),
+      status: a.enum(['active', 'inactive', 'suspended']) // Default: 'active'),
       permissions: a.json(),
       lastLoginAt: a.datetime(),
       createdAt: a.datetime(),
@@ -86,7 +86,7 @@ const schema = a.schema({
       sellerID: a.id().required(),
       seller: a.belongsTo('User', 'sellerID'),
       boxNumber: a.string(),
-      status: a.enum(['draft', 'in_progress', 'finalized', 'listed', 'sold']).default('draft'),
+      status: a.enum(['draft', 'in_progress', 'finalized', 'listed', 'sold']) // Default: 'draft'),
       location: a.string(),
       materialType: a.enum(['aluminum', 'copper', 'brass', 'stainless', 'steel', 'mixed']),
       
@@ -94,7 +94,7 @@ const schema = a.schema({
       length: a.float(),
       width: a.float(),
       height: a.float(),
-      dimensionUnit: a.enum(['inches', 'cm']).default('inches'),
+      dimensionUnit: a.enum(['inches', 'cm']) // Default: 'inches'),
       
       // Weights (lb is authoritative, kg is derived)
       grossWeightLb: a.float(),
@@ -155,14 +155,14 @@ const schema = a.schema({
       weightKg: a.float(),
       
       // Fill level (required)
-      fillLevel: a.enum(['empty', 'partial', 'full']).required(),
+      fillLevel: a.enum(['empty', 'partial', 'full']),
       
       // Images (up to 10, at least 1 required)
       images: a.string().array(),
       imagesCount: a.integer().default(0),
       
       // Status
-      status: a.enum(['draft', 'active', 'removed']).default('active'),
+      status: a.enum(['draft', 'active', 'removed']) // Default: 'active'),
       
       description: a.string(),
       notes: a.string(),
@@ -196,7 +196,7 @@ const schema = a.schema({
       listingDescription: a.string(),
       
       // Auction type and rules
-      auctionType: a.enum(['sealed', 'open']).default('sealed'),
+      auctionType: a.enum(['sealed', 'open']) // Default: 'sealed'),
       
       // Pricing
       startingPrice: a.float(),
@@ -218,7 +218,7 @@ const schema = a.schema({
       antiSnipingMinutes: a.integer().default(5),
       
       // Status
-      status: a.enum(['draft', 'active', 'closed', 'sold', 'cancelled']).default('draft'),
+      status: a.enum(['draft', 'active', 'closed', 'sold', 'cancelled']) // Default: 'draft'),
       
       // Winner tracking
       winningBidID: a.id(),
@@ -262,9 +262,9 @@ const schema = a.schema({
       bidAmount: a.float().required(),
       bidCurrency: a.string().default('CAD'),
       
-      bidStatus: a.enum(['pending', 'accepted', 'rejected', 'outbid']).default('pending'),
+      bidStatus: a.enum(['pending', 'accepted', 'rejected', 'outbid']) // Default: 'pending'),
       
-      bidType: a.enum(['initial', 'counter', 'auto_increment']).default('initial'),
+      bidType: a.enum(['initial', 'counter', 'auto_increment']) // Default: 'initial'),
       
       notes: a.string(),
       
