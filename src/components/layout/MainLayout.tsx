@@ -14,7 +14,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   onSignOut
 }) => {
   return (
-    <div className="flex min-h-screen bg-dark-bg-primary">
+    <div className="flex min-h-screen bg-black">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <TopBar onRefresh={onRefresh} onSignOut={onSignOut} />
