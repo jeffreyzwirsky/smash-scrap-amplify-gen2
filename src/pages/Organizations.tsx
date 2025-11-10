@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import { generateClient } from 'aws-amplify/data'
 import type { Schema } from '../../amplify/data/resource'
 
-const client = generateClient<Schema>()
-
 interface Organization {
   orgID: string
   orgName: string
@@ -12,6 +10,7 @@ interface Organization {
 }
 
 export function Organizations() {
+  const client = generateClient<Schema>()
   const [orgs, setOrgs] = useState<Organization[]>([])
   const [loading, setLoading] = useState(true)
   const [newOrgName, setNewOrgName] = useState('')
@@ -50,7 +49,7 @@ export function Organizations() {
       await fetchOrganizations()
     } catch (error) {
       console.error('Error creating organization:', error)
-      setError('Failed to create organization. Check console for details.')
+      setError('Failed to create organization')
     } finally {
       setCreating(false)
     }
@@ -78,7 +77,6 @@ export function Organizations() {
           </div>
         )}
 
-        {/* Create Organization Form */}
         <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 p-6 mb-6">
           <h2 className="text-xl font-bold text-white mb-4">Create New Organization</h2>
           <form onSubmit={createOrganization} className="flex gap-3">
@@ -100,7 +98,6 @@ export function Organizations() {
           </form>
         </div>
 
-        {/* Organizations Table */}
         <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-800">
             <h2 className="text-xl font-bold text-white">Organizations</h2>
