@@ -4,7 +4,7 @@ interface StatCardProps {
   title: string
   value: string | number
   subtitle?: string
-  icon: React.ElementType  // Accepts any React icon component
+  icon: React.ElementType
   trend?: {
     value: string
     positive: boolean
@@ -20,7 +20,6 @@ export const StatCard: React.FC<StatCardProps> = ({
   trend,
   accentColor = 'red',
 }) => {
-  // Accent color classes
   const accentColors: Record<string, string> = {
     red: 'bg-red-500/10 text-red-500',
     blue: 'bg-blue-500/10 text-blue-500',
@@ -41,7 +40,6 @@ export const StatCard: React.FC<StatCardProps> = ({
           <Icon className="w-6 h-6" />
         </div>
       </div>
-      
       <div className="flex items-baseline gap-3">
         <h2 className="text-3xl font-bold text-dark-text-primary">{value}</h2>
         {trend && (
@@ -50,7 +48,6 @@ export const StatCard: React.FC<StatCardProps> = ({
           </span>
         )}
       </div>
-      
       {subtitle && (
         <p className="text-dark-text-secondary text-sm mt-2">{subtitle}</p>
       )}
