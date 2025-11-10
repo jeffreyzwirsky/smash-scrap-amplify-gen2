@@ -26,6 +26,7 @@ interface Box {
   netWeightLb?: number
   partsCount?: number
   isFinalized?: boolean
+  orgID?: string
 }
 
 export function BoxDetails() {
@@ -83,7 +84,6 @@ export function BoxDetails() {
 
   return (
     <div className="p-8">
-      {/* Header */}
       <div className="flex justify-between items-start mb-8">
         <div>
           <button
@@ -115,7 +115,6 @@ export function BoxDetails() {
         </div>
       </div>
 
-      {/* Box Info */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-sm text-gray-500 mb-1">Material Type</h3>
@@ -131,7 +130,6 @@ export function BoxDetails() {
         </div>
       </div>
 
-      {/* Parts List */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-bold">Parts in This Box</h2>
@@ -149,7 +147,6 @@ export function BoxDetails() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fill Level</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Weight (lb)</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Images</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -168,11 +165,6 @@ export function BoxDetails() {
                   </td>
                   <td className="px-6 py-4">{part.weightLb?.toFixed(2) || 'N/A'}</td>
                   <td className="px-6 py-4">{part.images?.length || 0}</td>
-                  <td className="px-6 py-4">
-                    <button className="text-blue-600 hover:text-blue-800">Edit</button>
-                    {' | '}
-                    <button className="text-red-600 hover:text-red-800">Delete</button>
-                  </td>
                 </tr>
               ))}
             </tbody>
@@ -180,11 +172,10 @@ export function BoxDetails() {
         )}
       </div>
 
-      {/* Add Part Modal */}
       {showAddPart && (
         <AddPartModal
           boxId={boxId!}
-          orgId={box.orgID}
+          orgId={box.orgID!}
           onClose={() => setShowAddPart(false)}
           onCreated={() => {
             setShowAddPart(false)
@@ -196,7 +187,6 @@ export function BoxDetails() {
   )
 }
 
-// Add Part Modal Component
 function AddPartModal({ boxId, orgId, onClose, onCreated }: {
   boxId: string
   orgId: string
@@ -215,18 +205,16 @@ function AddPartModal({ boxId, orgId, onClose, onCreated }: {
     setCreating(true)
 
     try {
-      // Upload images to S3 first
       const imageKeys: string[] = []
       for (const file of images) {
         const key = `parts/${boxId}/${Date.now()}-${file.name}`
         await uploadData({
-          key,
+          path: key,
           data: file,
         }).result
         imageKeys.push(key)
       }
 
-      // Create part
       await client.models.Part.create({
         partNumber,
         partName,
