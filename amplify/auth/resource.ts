@@ -34,23 +34,7 @@ export const auth = defineAuth({
   },
 
   // User groups for role-based access control
-  groups: {
-    SuperAdmin: {
-      description: 'Super administrators with full system access',
-    },
-    SellerAdmin: {
-      description: 'Seller organization administrators',
-    },
-    YardOperator: {
-      description: 'Yard operators who manage boxes and parts',
-    },
-    Buyer: {
-      description: 'Buyers who can view marketplace and place bids',
-    },
-    Inspector: {
-      description: 'Inspectors with read-only access',
-    },
-  },
+  groups: ['SuperAdmin', 'SellerAdmin', 'YardOperator', 'Buyer', 'Inspector'],
 
   // Multi-factor authentication (optional for users)
   multifactor: {
