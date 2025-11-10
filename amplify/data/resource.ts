@@ -273,11 +273,6 @@ const schema = a.schema({
       allow.group('Buyer').to(['read']),
       allow.publicApiKey().to(['read']),
     ]),
-     .secondaryIndexes((index) => [
-      index('statusBidDue')
-        .sortKeys(['bidDueAt'])
-        .queryField('saleByStatusAndBidDue'),
-    ]),
 
   // ============================================
   // BIDS TABLE
