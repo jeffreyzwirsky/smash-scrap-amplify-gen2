@@ -1,0 +1,9 @@
+{
+  "name": "pre-token-generation",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "handler.ts",
+  "dependencies": {
+    "@types/aws-lambda": "^8.10.130"
+  }
+}
