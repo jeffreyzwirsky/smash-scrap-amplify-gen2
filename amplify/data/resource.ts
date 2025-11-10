@@ -43,6 +43,11 @@ const schema = a.schema({
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
           users: a.hasMany('User', 'orgID'),
+          boxes: a.hasMany('Box', 'orgID'),
+          parts: a.hasMany('Part', 'orgID'),
+          sales: a.hasMany('Sale', 'orgID'),
+          bids: a.hasMany('Bid', 'orgID'),
+          termsAcceptances: a.hasMany('TermsAcceptance', 'orgID'),
     })
     .authorization((allow) => [
       allow.authenticated(),
