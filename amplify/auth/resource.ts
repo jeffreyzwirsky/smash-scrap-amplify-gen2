@@ -3,13 +3,12 @@ import { defineAuth } from '@aws-amplify/backend';
 /**
  * Define and configure your auth resource
  * @see https://docs.amplify.aws/gen2/build-a-backend/auth
- * 
+ *
  * SMASH SCRAP Authentication Configuration:
  * - Email-based login with verification codes
  * - Custom attributes: orgID, role
  * - User groups: SuperAdmin, SellerAdmin, YardOperator, Buyer, Inspector
  * - MFA optional (SMS + TOTP)
- * - Strong password policy
  */
 export const auth = defineAuth({
   loginWith: {
@@ -20,7 +19,7 @@ export const auth = defineAuth({
         `Your verification code is: ${createCode()}`,
     },
   },
-  
+
   // Custom attributes for multi-tenancy and role management
   userAttributes: {
     'custom:orgID': {
@@ -45,7 +44,4 @@ export const auth = defineAuth({
 
   // Account recovery settings
   accountRecovery: 'EMAIL_ONLY',
-
-  
-
-
+});
