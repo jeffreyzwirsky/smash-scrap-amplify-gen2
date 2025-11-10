@@ -3,8 +3,5 @@ import { defineFunction } from '@aws-amplify/backend'
 export const postConfirmation = defineFunction({
   name: 'post-confirmation',
   entry: './handler.ts',
-  timeoutSeconds: 60,
-  environment: {
-    USER_TABLE_NAME: 'User'
-  }
+  timeoutSeconds: 60
 })
