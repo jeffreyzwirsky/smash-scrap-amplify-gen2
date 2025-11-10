@@ -14,12 +14,20 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   onSignOut
 }) => {
   return (
-    <div className="flex min-h-screen w-full bg-black">
+    <div className="flex min-h-screen w-full bg-[#0b1437]">
+      {/* Sidebar - Fixed width */}
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      
+      {/* Main Content Area - Flexible */}
+      <div className="flex flex-col flex-1 min-w-0">
+        {/* Top Bar - Fixed height */}
         <TopBar onRefresh={onRefresh} onSignOut={onSignOut} />
-        <main className="flex-1 p-8 overflow-auto">
-          {children}
+        
+        {/* Content Area - Scrollable */}
+        <main className="flex-1 p-8 overflow-auto bg-[#0b1437]">
+          <div className="max-w-[1600px] mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>
