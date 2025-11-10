@@ -3,24 +3,36 @@
 interface CardProps {
   children: React.ReactNode
   className?: string
-  hover?: boolean
-  onClick?: () => void
+  title?: string
+  action?: React.ReactNode
+  padding?: 'none' | 'sm' | 'md' | 'lg'
 }
 
-export const Card: React.FC<CardProps> = ({ 
-  children, 
-  className = '', 
-  hover = false,
-  onClick 
+export const Card: React.FC<CardProps> = ({
+  children,
+  className = '',
+  title,
+  action,
+  padding = 'md'
 }) => {
-  const hoverClass = hover ? 'hover:border-red-600 hover:shadow-red-900/20 transition-all duration-200 cursor-pointer' : ''
-  
+  const paddingClasses = {
+    none: '',
+    sm: 'p-4',
+    md: 'p-6',
+    lg: 'p-8'
+  }
+
   return (
-    <div 
-      className={+"g-[#2d2d2d] rounded-lg shadow-lg border border-gray-800  "+}
-      onClick={onClick}
-    >
-      {children}
+    <div className={`bg-[#1a1b1e] border border-[#2d2e32] rounded-xl shadow-lg ${className}`}>
+      {title && (
+        <div className={`flex justify-between items-center border-b border-[#2d2e32] ${paddingClasses[padding]}`}>
+          <h3 className="text-lg font-semibold text-white">{title}</h3>
+          {action}
+        </div>
+      )}
+      <div className={paddingClasses[padding]}>
+        {children}
+      </div>
     </div>
   )
 }
