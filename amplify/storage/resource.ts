@@ -23,7 +23,7 @@ export const storage = defineStorage({
     // Private organization-scoped images
     'private/{orgID}/*': [
       // Org members can read, write, delete their org's images
-      allow.authenticated().to(['read', 'write', 'delete']),
+      allow.authenticated.to(['read', 'write', 'delete']),
       // Super admins have full access
       allow.groups(['SuperAdmin']).to(['read', 'write', 'delete']),
       // Seller admins manage their org's images

@@ -28,14 +28,14 @@ const schema = a.schema({
   // ============================================
   Organization: a
     .model({
-      orgID: a.id().required(),
-      orgName: a.string().required(),
+      orgID: a.id(),
+      orgName: a.string(),
       address: a.string(),
       city: a.string(),
       province: a.string(),
       postalCode: a.string(),
-      country: a.string().default('Canada'),
-      contactEmail: a.email().required(),
+      country: a.string(),
+      contactEmail: a.email(),
       contactPhone: a.phone(),
       region: a.string(),
       status: a.enum(['active', 'inactive', 'suspended']),
@@ -53,17 +53,17 @@ const schema = a.schema({
   // ============================================
   User: a
     .model({
-      userID: a.id().required(),
-      cognitoID: a.string().required(),
-      email: a.email().required(),
-      displayName: a.string().required(),
+      userID: a.id(),
+      cognitoID: a.string(),
+      email: a.email(),
+      displayName: a.string(),
       firstName: a.string(),
       lastName: a.string(),
       phone: a.phone(),
-      role: a.enum(['SuperAdmin', 'SellerAdmin', 'YardOperator', 'Buyer', 'Inspector']).required(),
-      orgID: a.id().required(),
+      role: a.enum(['SuperAdmin', 'SellerAdmin', 'YardOperator', 'Buyer', 'Inspector']),
+      orgID: a.id(),
       organization: a.belongsTo('Organization', 'orgID'),
-      status: a.enum(['active', 'inactive', 'suspended']).default('active'),
+      status: a.enum(['active', 'inactive', 'suspended']),
       permissions: a.json(),
       lastLoginAt: a.datetime(),
       createdAt: a.datetime(),
@@ -80,13 +80,13 @@ const schema = a.schema({
   // ============================================
   Box: a
     .model({
-      boxID: a.id().required(),
-      orgID: a.id().required(),
+      boxID: a.id(),
+      orgID: a.id(),
       organization: a.belongsTo('Organization', 'orgID'),
-      sellerID: a.id().required(),
+      sellerID: a.id(),
       seller: a.belongsTo('User', 'sellerID'),
       boxNumber: a.string(),
-      status: a.enum(['draft', 'in_progress', 'finalized', 'listed', 'sold']).default('draft'),
+      status: a.enum(['draft', 'in_progress', 'finalized', 'listed', 'sold']),
       location: a.string(),
       materialType: a.enum(['aluminum', 'copper', 'brass', 'stainless', 'steel', 'mixed']),
       
@@ -94,7 +94,7 @@ const schema = a.schema({
       length: a.float(),
       width: a.float(),
       height: a.float(),
-      dimensionUnit: a.enum(['inches', 'cm']).default('inches'),
+      dimensionUnit: a.enum(['inches', 'cm']),
       
       // Weights (lb is authoritative, kg is derived)
       grossWeightLb: a.float(),
@@ -105,17 +105,17 @@ const schema = a.schema({
       netWeightKg: a.float(),
       
       // Finalization tracking
-      isFinalized: a.boolean().default(false),
+      isFinalized: a.boolean(),
       finalizedAt: a.datetime(),
       finalizedBy: a.id(),
       finalizeRecord: a.json(), // Stores finalization audit data
       
       // Images (up to 10)
       images: a.string().array(), // Array of S3 keys
-      imagesCount: a.integer().default(0),
+      imagesCount: a.integer(),
       
       // Part tracking
-      partsCount: a.integer().default(0),
+      partsCount: a.integer(),
       parts: a.hasMany('Part', 'boxID'),
       
       notes: a.string(),
@@ -137,12 +137,12 @@ const schema = a.schema({
   // ============================================
   Part: a
     .model({
-      partID: a.id().required(),
-      boxID: a.id().required(),
+      partID: a.id(),
+      boxID: a.id(),
       box: a.belongsTo('Box', 'boxID'),
-      orgID: a.id().required(),
+      orgID: a.id(),
       organization: a.belongsTo('Organization', 'orgID'),
-      sellerID: a.id().required(),
+      sellerID: a.id(),
       seller: a.belongsTo('User', 'sellerID'),
       
       partNumber: a.string(),
@@ -155,14 +155,14 @@ const schema = a.schema({
       weightKg: a.float(),
       
       // Fill level (required)
-      fillLevel: a.enum(['empty', 'partial', 'full']).required(),
+      fillLevel: a.enum(['empty', 'partial', 'full']),
       
       // Images (up to 10, at least 1 required)
       images: a.string().array(),
-      imagesCount: a.integer().default(0),
+      imagesCount: a.integer(),
       
       // Status
-      status: a.enum(['draft', 'active', 'removed']).default('active'),
+      status: a.enum(['draft', 'active', 'removed']),
       
       description: a.string(),
       notes: a.string(),
@@ -183,50 +183,50 @@ const schema = a.schema({
   // ============================================
   Sale: a
     .model({
-      saleID: a.id().required(),
-      boxID: a.id().required(),
+      saleID: a.id(),
+      boxID: a.id(),
       box: a.belongsTo('Box', 'boxID'),
-      orgID: a.id().required(),
+      orgID: a.id(),
       organization: a.belongsTo('Organization', 'orgID'),
-      sellerID: a.id().required(),
+      sellerID: a.id(),
       seller: a.belongsTo('User', 'sellerID'),
       
       // Sale details
-      listingTitle: a.string().required(),
+      listingTitle: a.string(),
       listingDescription: a.string(),
       
       // Auction type and rules
-      auctionType: a.enum(['sealed', 'open']).default('sealed'),
+      auctionType: a.enum(['sealed', 'open']),
       
       // Pricing
       startingPrice: a.float(),
       reservePrice: a.float(),
       currentBid: a.float(),
-      bidCurrency: a.string().default('CAD'),
+      bidCurrency: a.string(),
       minBidIncrement: a.float(), // For open auctions
       
       // Timing
       startTime: a.datetime(),
       endTime: a.datetime(),
-      bidDueAt: a.datetime().required(),
+      bidDueAt: a.datetime(),
       
       // Auction controls
-      autoClose: a.boolean().default(true),
-      manualClose: a.boolean().default(false),
-      acceptManualOverride: a.boolean().default(false), // Allow SellerAdmin to accept bid before deadline
-      antiSnipingEnabled: a.boolean().default(false), // Extend deadline if last-minute bid
-      antiSnipingMinutes: a.integer().default(5),
+      autoClose: a.boolean(),
+      manualClose: a.boolean(),
+      acceptManualOverride: a.boolean(), // Allow SellerAdmin to accept bid before deadline
+      antiSnipingEnabled: a.boolean(), // Extend deadline if last-minute bid
+      antiSnipingMinutes: a.integer(),
       
       // Status
-      status: a.enum(['draft', 'active', 'closed', 'sold', 'cancelled']).default('draft'),
+      status: a.enum(['draft', 'active', 'closed', 'sold', 'cancelled']),
       
       // Winner tracking
       winningBidID: a.id(),
       winningBuyerID: a.id(),
       
       // Terms and conditions
-      termsText: a.string().required(),
-      requireTermsAcceptance: a.boolean().default(true),
+      termsText: a.string(),
+      requireTermsAcceptance: a.boolean(),
       
       // Audit trail
       bidAuditTrail: a.json(), // Track bid history
@@ -253,22 +253,22 @@ const schema = a.schema({
   // ============================================
   Bid: a
     .model({
-      bidID: a.id().required(),
-      saleID: a.id().required(),
+      bidID: a.id(),
+      saleID: a.id(),
       sale: a.belongsTo('Sale', 'saleID'),
-      buyerID: a.id().required(),
+      buyerID: a.id(),
       buyer: a.belongsTo('User', 'buyerID'),
       
-      bidAmount: a.float().required(),
-      bidCurrency: a.string().default('CAD'),
+      bidAmount: a.float(),
+      bidCurrency: a.string(),
       
-      bidStatus: a.enum(['pending', 'accepted', 'rejected', 'outbid']).default('pending'),
+      bidStatus: a.enum(['pending', 'accepted', 'rejected', 'outbid']),
       
-      bidType: a.enum(['initial', 'counter', 'auto_increment']).default('initial'),
+      bidType: a.enum(['initial', 'counter', 'auto_increment']),
       
       notes: a.string(),
       
-      submittedAt: a.datetime().required(),
+      submittedAt: a.datetime(),
       respondedAt: a.datetime(),
       
       createdAt: a.datetime(),
@@ -286,13 +286,13 @@ const schema = a.schema({
   // ============================================
   TermsAcceptance: a
     .model({
-      acceptanceID: a.id().required(),
-      saleID: a.id().required(),
+      acceptanceID: a.id(),
+      saleID: a.id(),
       sale: a.belongsTo('Sale', 'saleID'),
-      buyerID: a.id().required(),
+      buyerID: a.id(),
       buyer: a.belongsTo('User', 'buyerID'),
       
-      acceptedAt: a.datetime().required(),
+      acceptedAt: a.datetime(),
       ipAddress: a.string(),
       userAgent: a.string(),
       
