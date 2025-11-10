@@ -50,11 +50,12 @@ const schema = a.schema({
           sales: a.hasMany('Sale', 'orgID'),
           bids: a.hasMany('Bid', 'orgID'),
           termsAcceptances: a.hasMany('TermsAcceptance', 'orgID'),
+               orgModules: a.hasMany('OrganizationModule', 'orgID'),
     })
     .authorization((allow) => [
       allow.authenticated(),
       allow.group('SuperAdmin'),
-          orgModules: a.hasMany('OrganizationModule', 'orgID'),
+
     ]),
 
   // ============================================
@@ -83,11 +84,12 @@ const schema = a.schema({
             createdSales: a.hasMany('Sale', 'sellerID'),
             placedBids: a.hasMany('Bid', 'buyerID'),
             acceptedTerms: a.hasMany('TermsAcceptance', 'buyerID'),
+               userModules: a.hasMany('UserModule', 'userID'),
     })
     .authorization((allow) => [
       allow.owner(),
       allow.group('SuperAdmin'),
-          userModules: a.hasMany('UserModule', 'userID'),
+
       allow.group('SellerAdmin').to(['read', 'update']),
     ]),
 
