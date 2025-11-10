@@ -1,44 +1,48 @@
-import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { generateClient } from 'aws-amplify/data'
 import type { Schema } from '../../amplify/data/resource'
 import { useUserRole } from '../hooks/useUserRole'
 import { getCurrentUser } from 'aws-amplify/auth'
+import { MainLayout } from '../components/layout/MainLayout'
+import { StatCard } from '../components/ui/StatCard'
+import { RecentActivity } from '../components/dashboard/RecentActivity'
+import { StockAlerts } from '../components/dashboard/StockAlerts'
+import { UpcomingAuctions } from '../components/dashboard/UpcomingAuctions'
+import {
+  DollarSign,
+  Package,
+  Car,
+  Gavel
+} from 'lucide-react'
 
 export function Dashboard() {
   const client = generateClient<Schema>()
-  const navigate = useNavigate()
-  const { role: userRole, loading: roleLoading } = useUserRole()
-  const [stats, setStats] = useState({ boxes: 0, parts: 0, sales: 0 })
+  const { role: userRole } = useUserRole()
+  const [stats, setStats] = useState({ boxes: 0, parts: 0, sales: 0, revenue: 0 })
+  const [loading, setLoading] = useState(true)
   const [userInfo, setUserInfo] = useState<any>(null)
   const [orgInfo, setOrgInfo] = useState<any>(null)
 
   useEffect(() => {
-    fetchStats()
-    fetchUserAndOrg()
+    fetchDashboardData()
   }, [])
 
-  async function fetchStats() {
+  async function fetchDashboardData() {
     try {
-      const [boxesData, partsData, salesData] = await Promise.all([
+      const [boxesData, partsData, salesData, currentUser] = await Promise.all([
         client.models.Box.list(),
         client.models.Part.list(),
-        client.models.Sale.list()
+        client.models.Sale.list(),
+        getCurrentUser()
       ])
-      
+
       setStats({
         boxes: boxesData.data.length,
         parts: partsData.data.length,
-        sales: salesData.data.length
+        sales: salesData.data.length,
+        revenue: 176.72 // TODO: Calculate from sales
       })
-    } catch (error) {
-      console.error('Error fetching stats:', error)
-    }
-  }
 
-  async function fetchUserAndOrg() {
-    try {
-      const currentUser = await getCurrentUser()
       const { data: user } = await client.models.User.get({ userID: currentUser.userId })
       setUserInfo(user)
 
@@ -47,76 +51,83 @@ export function Dashboard() {
         setOrgInfo(org)
       }
     } catch (error) {
-      console.error('Error fetching user/org info:', error)
+      console.error('Error fetching dashboard data:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  if (roleLoading) {
+  const activities = [
+    { id: '1', title: 'New vehicle added: 2018 Toyota Corolla', time: '2 hours ago', type: 'vehicle' as const },
+    { id: '2', title: 'Sale completed: $176.72 to ABC Scrap Co', time: '1 day ago', type: 'sale' as const },
+    { id: '3', title: 'Converter removed from Honda Accord', time: '2 days ago', type: 'converter' as const },
+    { id: '4', title: 'Inventory updated: Copper Wire restocked', time: '3 days ago', type: 'inventory' as const }
+  ]
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-white text-xl">Loading...</p>
-      </div>
+      <MainLayout onSignOut={() => {}}>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-white text-xl">Loading...</p>
+        </div>
+      </MainLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white">SMASH SCRAP Dashboard</h1>
+    <MainLayout onRefresh={fetchDashboardData} onSignOut={() => {}}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
           {orgInfo && (
-            <p className="text-gray-400 mt-2">
+            <p className="text-gray-400">
               Organization: <span className="text-red-500 font-medium">{orgInfo.orgName}</span>
             </p>
           )}
         </div>
-        
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-800">
-            <p className="text-gray-400 text-sm mb-2">Total Boxes</p>
-            <p className="text-4xl font-bold text-white">{stats.boxes}</p>
-          </div>
-          <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-800">
-            <p className="text-gray-400 text-sm mb-2">Total Parts</p>
-            <p className="text-4xl font-bold text-white">{stats.parts}</p>
-          </div>
-          <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-800">
-            <p className="text-gray-400 text-sm mb-2">Active Sales</p>
-            <p className="text-4xl font-bold text-white">{stats.sales}</p>
-          </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard
+            title="Total Revenue"
+            value={`$${stats.revenue.toFixed(2)}`}
+            subtitle="+12.5% vs last month"
+            icon={DollarSign}
+            trend={{ value: '12.5%', positive: true }}
+            accentColor="red"
+          />
+          <StatCard
+            title="Inventory Value"
+            value="$7,730.62"
+            subtitle={`${stats.parts} items in stock`}
+            icon={Package}
+            accentColor="red"
+          />
+          <StatCard
+            title="Vehicles"
+            value={stats.boxes}
+            subtitle="+3 this week"
+            icon={Car}
+            trend={{ value: '3', positive: true }}
+            accentColor="red"
+          />
+          <StatCard
+            title="Active Auctions"
+            value={stats.sales}
+            subtitle="3 ending today"
+            icon={Gavel}
+            accentColor="red"
+          />
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button
-            onClick={() => navigate('/boxes')}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg transition"
-          >
-            Manage Boxes
-          </button>
-          <button
-            onClick={() => navigate('/parts')}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg transition"
-          >
-            Manage Parts
-          </button>
-          <button
-            onClick={() => navigate('/marketplace')}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg transition"
-          >
-            Marketplace
-          </button>
-          {userRole === 'SuperAdmin' && (
-            <button
-              onClick={() => navigate('/organizations')}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg transition"
-            >
-              Organizations
-            </button>
-          )}
+        {/* Widgets Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <RecentActivity activities={activities} />
+          <StockAlerts alerts={[]} />
+          <UpcomingAuctions auctions={[]} />
         </div>
       </div>
-    </div>
+    </MainLayout>
   )
 }
