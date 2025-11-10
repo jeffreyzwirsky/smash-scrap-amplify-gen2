@@ -6,6 +6,8 @@ import { Layout } from './components/Layout'
 import { Dashboard } from './pages/Dashboard'
 import { Organizations } from './pages/Organizations'
 import { Boxes } from './pages/Boxes'
+import { BoxDetails } from './pages/BoxDetails'
+
 
 function App() {
   return (
@@ -16,6 +18,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/organizations" element={<Organizations />} />
+              <Route path="/boxes/:boxId" element={<BoxDetails />} />
               <Route path="/boxes" element={<Boxes />} />
               <Route path="*" element={<div>Page not found</div>} />
             </Routes>
