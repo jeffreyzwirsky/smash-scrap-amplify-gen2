@@ -74,6 +74,11 @@ const schema = a.schema({
       lastLoginAt: a.datetime(),
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
+            soldBoxes: a.hasMany('Box', 'sellerID'),
+            soldParts: a.hasMany('Part', 'sellerID'),
+            createdSales: a.hasMany('Sale', 'sellerID'),
+            placedBids: a.hasMany('Bid', 'buyerID'),
+            acceptedTerms: a.hasMany('TermsAcceptance', 'buyerID'),
     })
     .authorization((allow) => [
       allow.owner(),
