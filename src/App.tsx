@@ -1,10 +1,10 @@
 import { Authenticator } from '@aws-amplify/ui-react'
-import { Routes, Route, Navigate, BrowserRouter as Router } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { generateClient } from 'aws-amplify/data'
 import type { Schema } from '../amplify/data/resource'
 import '@aws-amplify/ui-react/styles.css'
-import './App.css'
+// ❌ REMOVED: import './App.css'
 import { Dashboard } from './pages/Dashboard'
 import { Boxes } from './pages/Boxes'
 import { BoxDetails } from './pages/BoxDetails'
@@ -65,6 +65,7 @@ function AuthenticatedApp({ user, signOut }: { user: any; signOut: any }) {
     }
   }, [user?.userId])
 
+  // ✅ NO NAV BAR HERE - Dashboard.tsx now uses MainLayout which includes Sidebar + TopBar
   return (
     <Router>
       <Routes>
