@@ -128,6 +128,7 @@ const schema = a.schema({
       // Part tracking
       partsCount: a.integer(),
       parts: a.hasMany('Part', 'boxID'),
+            sale: a.hasOne('Sale', 'boxID'),
       
       notes: a.string(),
       createdAt: a.datetime(),
