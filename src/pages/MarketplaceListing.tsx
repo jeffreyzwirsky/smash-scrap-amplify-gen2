@@ -17,6 +17,7 @@ interface Sale {
   minBidIncrement?: number
   endTime?: string
   requireTermsAcceptance?: boolean
+  orgID?: string
 }
 
 export function MarketplaceListing() {
@@ -67,7 +68,7 @@ export function MarketplaceListing() {
       await client.models.Bid.create({
         saleID: sale.saleID,
         buyerID: userId,
-        orgID: sale.orgID,
+        orgID: sale.orgID!,
         bidAmount: amount,
         bidCurrency: 'USD',
         bidStatus: 'pending',
