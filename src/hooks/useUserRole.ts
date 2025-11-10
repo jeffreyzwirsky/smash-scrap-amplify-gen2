@@ -1,48 +1,37 @@
 import { useEffect, useState } from 'react'
-import { fetchUserAttributes, fetchAuthSession } from 'aws-amplify/auth'
+import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth'
 
-export interface UserRole {
-  email: string | undefined
-  userId: string | undefined
-  role: string | undefined
-  orgId: string | undefined
-  groups: string[]
-  isLoading: boolean
-}
-
-export function useUserRole(): UserRole {
-  const [userRole, setUserRole] = useState<UserRole>({
-    email: undefined,
-    userId: undefined,
-    role: undefined,
-    orgId: undefined,
-    groups: [],
-    isLoading: true,
-  })
+export function useUserRole() {
+  const [userId, setUserId] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const [orgId, setOrgId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function getUserInfo() {
-      try {
-        const attributes = await fetchUserAttributes()
-        const session = await fetchAuthSession()
-        const groups = session.tokens?.accessToken?.payload['cognito:groups'] as string[] || []
-        
-        setUserRole({
-          email: attributes.email,
-          userId: attributes.sub,
-          role: attributes['custom:role'],
-          orgId: attributes['custom:orgID'],
-          groups,
-          isLoading: false,
-        })
-      } catch (error) {
-        console.error('Error fetching user role:', error)
-        setUserRole(prev => ({ ...prev, isLoading: false }))
-      }
-    }
-    
-    getUserInfo()
+    loadUserInfo()
   }, [])
 
-  return userRole
+  async function loadUserInfo() {
+    try {
+      const user = await getCurrentUser()
+      setUserId(user.userId)
+
+      const session = await fetchAuthSession()
+      const groups = session.tokens?.accessToken?.payload['cognito:groups'] as string[] | undefined
+      
+      if (groups && groups.length > 0) {
+        setUserRole(groups[0])
+      }
+
+      // Get custom attributes if needed
+      // const attributes = await fetchUserAttributes()
+      // setOrgId(attributes['custom:orgID'])
+    } catch (error) {
+      console.error('Error loading user info:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { userId, userRole, orgId, loading }
 }
