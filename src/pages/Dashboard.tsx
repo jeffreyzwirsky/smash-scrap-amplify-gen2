@@ -1,56 +1,117 @@
+import { useEffect, useState } from 'react'
 import { useUserRole } from '../hooks/useUserRole'
+import { client } from '../main'
+
+interface DashboardMetrics {
+  totalBoxes: number
+  totalInventoryValue: number
+  activeAuctions: number
+  completedSales: number
+  totalRevenue: number
+  awaitingInspection: number
+}
 
 export function Dashboard() {
   const { email, userId, role, orgId, groups } = useUserRole()
+  const [metrics, setMetrics] = useState<DashboardMetrics>({
+    totalBoxes: 0,
+    totalInventoryValue: 0,
+    activeAuctions: 0,
+    completedSales: 0,
+    totalRevenue: 0,
+    awaitingInspection: 0
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {{
+    const fetchMetrics = async () => {{
+      try {{
+        if (!orgId) {{
+          setLoading(false)
+          return
+        }}
+
+        const { data: boxes } = await client.models.Box.list({{ filter: {{ organizationId: {{ eq: orgId }} }} }})
+        const { data: sales } = await client.models.Sale.list({{ filter: {{ organizationId: {{ eq: orgId }} }} }})
+        const { data: parts } = await client.models.Part.list({{ filter: {{ organizationId: {{ eq: orgId }} }} }})
+
+        const totalBoxes = boxes?.length || 0
+        const totalInventoryValue = parts?.reduce((sum, part) => sum + (parseFloat(part.estimatedValue || '0') || 0), 0) || 0
+        const activeAuctions = sales?.filter(s => s.status === 'OPEN').length || 0
+        const completedSales = sales?.filter(s => s.status === 'COMPLETED').length || 0
+        const totalRevenue = sales?.filter(s => s.status === 'COMPLETED').reduce((sum, s) => sum + (parseFloat(s.finalPrice || '0') || 0), 0) || 0
+        const awaitingInspection = parts?.filter(p => p.inspectionStatus === 'PENDING').length || 0
+
+        setMetrics({{ totalBoxes, totalInventoryValue, activeAuctions, completedSales, totalRevenue, awaitingInspection }})
+      }} catch (error) {{
+        console.error('Dashboard fetch error:', error)
+      }} finally {{
+        setLoading(false)
+      }}
+    }}
+    fetchMetrics()
+  }}, [orgId])
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-900">Dashboard</h2>
-      
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">User Information</h3>
-        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Email</dt>
-            <dd className="mt-1 text-sm text-gray-900">{email}</dd>
-          </div>
-          <div>
-            <dt className="text-sm font-medium text-gray-500">User ID</dt>
-            <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">{userId}</dd>
-          </div>
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Role</dt>
-            <dd className="mt-1 text-sm text-gray-900">{role || 'Not assigned'}</dd>
-          </div>
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Organization ID</dt>
-            <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">{orgId || 'Not assigned'}</dd>
-          </div>
-          <div className="sm:col-span-2">
-            <dt className="text-sm font-medium text-gray-500">Cognito Groups</dt>
-            <dd className="mt-1">
-              {groups.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {groups.map(group => (
-                    <span key={group} className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                      {group}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <span className="text-sm text-gray-500">No groups assigned</span>
-              )}
-            </dd>
-          </div>
-        </dl>
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">Welcome back, {email}</p>
       </div>
 
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-yellow-900 mb-2">⚠️ Note: Role Assignment</h4>
-        <p className="text-sm text-yellow-700">
-          New users need to be assigned to a Cognito group and have custom:role and custom:orgID attributes set. 
-          This is currently done manually in AWS Cognito Console or will be handled by the post-confirmation Lambda function.
-        </p>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => <div key={i} className="bg-gray-200 dark:bg-gray-700 rounded-lg h-28 animate-pulse" />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md p-6 text-white">
+            <p className="text-sm font-medium opacity-90">Total Boxes</p>
+            <p className="text-3xl font-bold mt-2">{metrics.totalBoxes}</p>
+          </div>
+          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md p-6 text-white">
+            <p className="text-sm font-medium opacity-90">Inventory Value</p>
+            <p className="text-3xl font-bold mt-2">${metrics.totalInventoryValue.toLocaleString()}</p>
+          </div>
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md p-6 text-white">
+            <p className="text-sm font-medium opacity-90">Active Auctions</p>
+            <p className="text-3xl font-bold mt-2">{metrics.activeAuctions}</p>
+          </div>
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg shadow-md p-6 text-white">
+            <p className="text-sm font-medium opacity-90">Completed Sales</p>
+            <p className="text-3xl font-bold mt-2">{metrics.completedSales}</p>
+          </div>
+          <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-md p-6 text-white">
+            <p className="text-sm font-medium opacity-90">Total Revenue</p>
+            <p className="text-3xl font-bold mt-2">${metrics.totalRevenue.toLocaleString()}</p>
+          </div>
+          <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-md p-6 text-white">
+            <p className="text-sm font-medium opacity-90">Awaiting Inspection</p>
+            <p className="text-3xl font-bold mt-2">{metrics.awaitingInspection}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Account Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <p className="text-gray-600 dark:text-gray-400">Email</p>
+            <p className="text-gray-900 dark:text-white font-medium">{email}</p>
+          </div>
+          <div>
+            <p className="text-gray-600 dark:text-gray-400">User ID</p>
+            <p className="font-mono text-xs text-gray-900 dark:text-white">{userId}</p>
+          </div>
+          <div>
+            <p className="text-gray-600 dark:text-gray-400">Role</p>
+            <p className="text-gray-900 dark:text-white font-medium">{role || 'Not assigned'}</p>
+          </div>
+          <div>
+            <p className="text-gray-600 dark:text-gray-400">Organization ID</p>
+            <p className="font-mono text-xs text-gray-900 dark:text-white">{orgId || 'Not assigned'}</p>
+          </div>
+        </div>
       </div>
     </div>
   )
