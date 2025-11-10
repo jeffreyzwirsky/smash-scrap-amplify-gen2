@@ -30,6 +30,23 @@ function AuthenticatedApp({ user, signOut }: { user: any, signOut: any }) {
   useEffect(() => {
     async function ensureUserRecord() {
       try {
+        // CRITICAL FIX: First, ensure default organization exists
+        const { data: existingOrg } = await client.models.Organization.get({ 
+          orgID: 'default-org' 
+        })
+        
+        if (!existingOrg) {
+          await client.models.Organization.create({
+            orgID: 'default-org',
+            orgName: 'Default Organization',
+            status: 'active',
+            region: 'ca-central-1',
+            contactEmail: user.signInDetails?.loginId || ''
+          })
+          console.log('✅ Default organization created')
+        }
+        
+        // Then check/create user record
         const { data: existingUser } = await client.models.User.get({ 
           userID: user.userId 
         })
@@ -45,7 +62,7 @@ function AuthenticatedApp({ user, signOut }: { user: any, signOut: any }) {
           console.log('✅ User record created')
         }
       } catch (error) {
-        console.error('Error creating user record:', error)
+        console.error('Error creating user/org record:', error)
       }
     }
 
