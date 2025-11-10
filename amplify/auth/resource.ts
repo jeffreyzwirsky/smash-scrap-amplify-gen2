@@ -1,15 +1,14 @@
-import { defineAuth } from '@aws-amplify/backend';
-import { preTokenGeneration } from '../function/pre-token-generation/resource';
+import { defineAuth } from '@aws-amplify/backend'
 
 /**
- * Define and configure your auth resource
- * @see https://docs.amplify.aws/gen2/build-a-backend/auth
- *
- * SMASH SCRAP Authentication Configuration:
+ * Cognito User Pool Configuration for SMASH SCRAP
+ * 
+ * Features:
  * - Email-based login with verification codes
  * - Custom attributes: orgID, role
- * - User groups: SuperAdmin, SellerAdmin, YardOperator, Buyer, Inspector
+ * - User groups for role-based access control
  * - MFA optional (SMS + TOTP)
+ * - Post-confirmation trigger for user provisioning
  */
 export const auth = defineAuth({
   loginWith: {
@@ -36,18 +35,13 @@ export const auth = defineAuth({
   // User groups for role-based access control
   groups: ['SuperAdmin', 'SellerAdmin', 'YardOperator', 'Buyer', 'Inspector'],
 
-  // Multi-factor authentication (optional for users)
+  // Multi-factor authentication (optional)
   multifactor: {
     mode: 'OPTIONAL',
     sms: true,
     totp: true,
   },
 
-  // Account recovery settings
+  // Account recovery
   accountRecovery: 'EMAIL_ONLY',
-
-    // Lambda triggers for JWT claim customization
-  triggers: {
-    preTokenGeneration,
-  },
-});
+})
