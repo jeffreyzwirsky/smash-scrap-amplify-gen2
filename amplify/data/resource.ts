@@ -42,6 +42,7 @@ const schema = a.schema({
       settings: a.json(),
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
+          users: a.hasMany('User', 'orgID'),
     })
     .authorization((allow) => [
       allow.authenticated(),
@@ -319,3 +320,4 @@ export const data = defineData({
     },
   },
 });
+          
