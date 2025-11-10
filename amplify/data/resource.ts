@@ -193,6 +193,8 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.group('SuperAdmin'),
+           // Org isolation: users can only access parts in their organization
+      allow.ownerDefinedIn('orgID'),
       allow.group('SellerAdmin').to(['read', 'create', 'update', 'delete']),
       allow.group('YardOperator').to(['read', 'create', 'update']),
       allow.group('Inspector').to(['read']),
@@ -264,6 +266,8 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.group('SuperAdmin'),
+           // Org isolation: users can only access sales in their organization
+      allow.ownerDefinedIn('orgID'),
       allow.group('SellerAdmin').to(['read', 'create', 'update', 'delete']),
       allow.group('YardOperator').to(['read']),
       allow.group('Buyer').to(['read']),
@@ -300,6 +304,8 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.group('SuperAdmin'),
+           // Org isolation: users can only access bids in their organization
+      allow.ownerDefinedIn('orgID'),
       allow.group('SellerAdmin').to(['read', 'update']),
       allow.owner().to(['read', 'create']),
       allow.group('Buyer').to(['read', 'create']),
@@ -328,6 +334,8 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.group('SuperAdmin'),
+           // Org isolation: users can only access terms acceptances in their organization
+      allow.ownerDefinedIn('orgID'),
       allow.group('SellerAdmin').to(['read']),
       allow.owner().to(['read', 'create']),
     ]),
