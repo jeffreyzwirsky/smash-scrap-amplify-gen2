@@ -22,10 +22,6 @@ export function useUserRole() {
       if (groups && groups.length > 0) {
         setUserRole(groups[0])
       }
-
-      // Get custom attributes if needed
-      // const attributes = await fetchUserAttributes()
-      // setOrgId(attributes['custom:orgID'])
     } catch (error) {
       console.error('Error loading user info:', error)
     } finally {
