@@ -1,4 +1,5 @@
-import { defineStorage, defineFunction } from '@aws-amplify/backend'
+import { defineStorage } from '@aws-amplify/backend'
+import { imageProcessor } from '../function/image-processor/resource'
 
 /**
  * S3 Storage Configuration for SMASH SCRAP Image Management
@@ -21,16 +22,12 @@ import { defineStorage, defineFunction } from '@aws-amplify/backend'
 export const storage = defineStorage({
   name: 'smashScrapImages',
   access: (allow) => ({
-    // Private organization-scoped images (all box and part images for that organization)
     'private/{orgID}/*': [
-      // Org members can read/write/delete for their own org's images
       allow.authenticated.to(['read', 'write', 'delete']),
       allow.groups(['SuperAdmin']).to(['read', 'write', 'delete']),
       allow.groups(['SellerAdmin', 'YardOperator']).to(['read', 'write', 'delete']),
       allow.groups(['Buyer', 'Inspector']).to(['read']),
     ],
-
-    // Public marketplace images (only for listed sales, box/part images are never public)
     'public/marketplace/*': [
       allow.guest.to(['read']),
       allow.authenticated.to(['read']),
@@ -38,9 +35,6 @@ export const storage = defineStorage({
     ],
   }),
   triggers: {
-    // S3 ObjectCreated triggers the Lambda image processor for all uploaded images
-    onUpload: defineFunction({
-      entry: './functions/image-processor/handler.ts',
-    }),
-  },
-});
+    onUpload: imageProcessor  // Reference the imported function
+  }
+})
