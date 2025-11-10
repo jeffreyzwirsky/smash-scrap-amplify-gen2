@@ -23,13 +23,10 @@ export function useUserRole(): UserRole {
   useEffect(() => {
     async function getUserInfo() {
       try {
-        // Get user attributes (custom:role, custom:orgID, email)
         const attributes = await fetchUserAttributes()
-        
-        // Get user's Cognito groups from JWT token
         const session = await fetchAuthSession()
         const groups = session.tokens?.accessToken?.payload['cognito:groups'] as string[] || []
-
+        
         setUserRole({
           email: attributes.email,
           userId: attributes.sub,
@@ -43,7 +40,7 @@ export function useUserRole(): UserRole {
         setUserRole(prev => ({ ...prev, isLoading: false }))
       }
     }
-
+    
     getUserInfo()
   }, [])
 
