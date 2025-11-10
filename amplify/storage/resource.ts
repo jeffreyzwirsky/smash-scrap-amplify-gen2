@@ -1,4 +1,4 @@
-import { defineStorage } from '@aws-amplify/backend';
+import { defineStorage, defineFunction } from '@aws-amplify/backend'
 
 /**
  * S3 Storage Configuration for SMASH SCRAP Image Management
@@ -6,6 +6,7 @@ import { defineStorage } from '@aws-amplify/backend';
  * Storage structure:
  * - /private/{orgID}/boxes/{boxID}/box-images/     (Box photos, max 10)
  * - /private/{orgID}/boxes/{boxID}/parts/{partID}/ (Part photos, max 10)
+ * - /public/marketplace/{saleID}/images/           (Marketplace images)
  * 
  * Features:
  * - Private storage with signed URLs
@@ -20,24 +21,26 @@ import { defineStorage } from '@aws-amplify/backend';
 export const storage = defineStorage({
   name: 'smashScrapImages',
   access: (allow) => ({
-    // Private organization-scoped images
+    // Private organization-scoped images (all box and part images for that organization)
     'private/{orgID}/*': [
-      // Org members can read, write, delete their org's images
+      // Org members can read/write/delete for their own org's images
       allow.authenticated.to(['read', 'write', 'delete']),
-      // Super admins have full access
       allow.groups(['SuperAdmin']).to(['read', 'write', 'delete']),
-      // Seller admins manage their org's images
       allow.groups(['SellerAdmin', 'YardOperator']).to(['read', 'write', 'delete']),
-      // Buyers and Inspectors can read marketplace images
       allow.groups(['Buyer', 'Inspector']).to(['read']),
     ],
-    
-    // Public marketplace images (for listed sales)
+
+    // Public marketplace images (only for listed sales, box/part images are never public)
     'public/marketplace/*': [
       allow.guest.to(['read']),
       allow.authenticated.to(['read']),
-      // Only admins and operators can upload to public marketplace
       allow.groups(['SuperAdmin', 'SellerAdmin', 'YardOperator']).to(['read', 'write', 'delete']),
     ],
   }),
+  triggers: {
+    // S3 ObjectCreated triggers the Lambda image processor for all uploaded images
+    onUpload: defineFunction({
+      entry: './functions/image-processor/handler.ts',
+    }),
+  },
 });
