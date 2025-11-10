@@ -23,17 +23,21 @@ export function Dashboard() {
   })
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {{
-    const fetchMetrics = async () => {{
-      try {{
-        if (!orgId) {{
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        if (!orgId) {
           setLoading(false)
           return
-        }}
+        }
 
-        const { data: boxes } = await client.models.Box.list({{ filter: {{ organizationId: {{ eq: orgId }} }} }})
-        const { data: sales } = await client.models.Sale.list({{ filter: {{ organizationId: {{ eq: orgId }} }} }})
-        const { data: parts } = await client.models.Part.list({{ filter: {{ organizationId: {{ eq: orgId }} }} }})
+        const boxReq = client.models.Box.list({ filter: { organizationId: { eq: orgId } } })
+        const salesReq = client.models.Sale.list({ filter: { organizationId: { eq: orgId } } })
+        const partsReq = client.models.Part.list({ filter: { organizationId: { eq: orgId } } })
+
+        const { data: boxes } = await boxReq
+        const { data: sales } = await salesReq
+        const { data: parts } = await partsReq
 
         const totalBoxes = boxes?.length || 0
         const totalInventoryValue = parts?.reduce((sum, part) => sum + (parseFloat(part.estimatedValue || '0') || 0), 0) || 0
@@ -42,15 +46,15 @@ export function Dashboard() {
         const totalRevenue = sales?.filter(s => s.status === 'COMPLETED').reduce((sum, s) => sum + (parseFloat(s.finalPrice || '0') || 0), 0) || 0
         const awaitingInspection = parts?.filter(p => p.inspectionStatus === 'PENDING').length || 0
 
-        setMetrics({{ totalBoxes, totalInventoryValue, activeAuctions, completedSales, totalRevenue, awaitingInspection }})
-      }} catch (error) {{
+        setMetrics({ totalBoxes, totalInventoryValue, activeAuctions, completedSales, totalRevenue, awaitingInspection })
+      } catch (error) {
         console.error('Dashboard fetch error:', error)
-      }} finally {{
+      } finally {
         setLoading(false)
-      }}
-    }}
+      }
+    }
     fetchMetrics()
-  }}, [orgId])
+  }, [orgId])
 
   return (
     <div className="space-y-6">
