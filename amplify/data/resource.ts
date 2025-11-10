@@ -34,7 +34,7 @@ const schema = a.schema({
       city: a.string(),
       province: a.string(),
       postalCode: a.string(),
-      country: a.string().default('Canada'),
+      country: a.string().default('Canada]),
       contactEmail: a.email().required(),
       contactPhone: a.phone(),
       region: a.string(),
@@ -45,7 +45,7 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.authenticated(),
-      allow.group('SuperAdmin'),
+      allow.group('SuperAdmin]),
     ]),
 
   // ============================================
@@ -62,8 +62,8 @@ const schema = a.schema({
       phone: a.phone(),
       role: a.enum(['SuperAdmin', 'SellerAdmin', 'YardOperator', 'Buyer', 'Inspector']),
       orgID: a.id().required(),
-      organization: a.belongsTo('Organization', 'orgID'),
-      status: a.enum(['active', 'inactive', 'suspended'),active'),
+      organization: a.belongsTo('Organization', 'orgID]),
+      status: a.enum(['active', 'inactive', 'suspended]),active]),
       permissions: a.json(),
       lastLoginAt: a.datetime(),
       createdAt: a.datetime(),
@@ -71,7 +71,7 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.owner(),
-      allow.group('SuperAdmin'),
+      allow.group('SuperAdmin]),
       allow.group('SellerAdmin').to(['read', 'update']),
     ]),
 
@@ -82,11 +82,11 @@ const schema = a.schema({
     .model({
       boxID: a.id().required(),
       orgID: a.id().required(),
-      organization: a.belongsTo('Organization', 'orgID'),
+      organization: a.belongsTo('Organization', 'orgID]),
       sellerID: a.id().required(),
-      seller: a.belongsTo('User', 'sellerID'),
+      seller: a.belongsTo('User', 'sellerID]),
       boxNumber: a.string(),
-      status: a.enum(['draft', 'in_progress', 'finalized', 'listed', 'sold'),draft'),
+      status: a.enum(['draft', 'in_progress', 'finalized', 'listed', 'sold]),draft]),
       location: a.string(),
       materialType: a.enum(['aluminum', 'copper', 'brass', 'stainless', 'steel', 'mixed']),
       
@@ -94,7 +94,7 @@ const schema = a.schema({
       length: a.float(),
       width: a.float(),
       height: a.float(),
-      dimensionUnit: a.enum(['inches', 'cm'),inches'),
+      dimensionUnit: a.enum(['inches', 'cm]),inches]),
       
       // Weights (lb is authoritative, kg is derived)
       grossWeightLb: a.float(),
@@ -116,7 +116,7 @@ const schema = a.schema({
       
       // Part tracking
       partsCount: a.integer().default(0),
-      parts: a.hasMany('Part', 'boxID'),
+      parts: a.hasMany('Part', 'boxID]),
       
       notes: a.string(),
       createdAt: a.datetime(),
@@ -125,7 +125,7 @@ const schema = a.schema({
       updatedBy: a.id(),
     })
     .authorization((allow) => [
-      allow.group('SuperAdmin'),
+      allow.group('SuperAdmin]),
       allow.group('SellerAdmin').to(['read', 'create', 'update', 'delete']),
       allow.group('YardOperator').to(['read', 'create', 'update']),
       allow.group('Inspector').to(['read']),
@@ -139,11 +139,11 @@ const schema = a.schema({
     .model({
       partID: a.id().required(),
       boxID: a.id().required(),
-      box: a.belongsTo('Box', 'boxID'),
+      box: a.belongsTo('Box', 'boxID]),
       orgID: a.id().required(),
-      organization: a.belongsTo('Organization', 'orgID'),
+      organization: a.belongsTo('Organization', 'orgID]),
       sellerID: a.id().required(),
-      seller: a.belongsTo('User', 'sellerID'),
+      seller: a.belongsTo('User', 'sellerID]),
       
       partNumber: a.string(),
       partName: a.string(),
@@ -162,7 +162,7 @@ const schema = a.schema({
       imagesCount: a.integer().default(0),
       
       // Status
-      status: a.enum(['draft', 'active', 'removed'),active'),
+      status: a.enum(['draft', 'active', 'removed]),active]),
       
       description: a.string(),
       notes: a.string(),
@@ -171,7 +171,7 @@ const schema = a.schema({
       addedBy: a.id(),
     })
     .authorization((allow) => [
-      allow.group('SuperAdmin'),
+      allow.group('SuperAdmin]),
       allow.group('SellerAdmin').to(['read', 'create', 'update', 'delete']),
       allow.group('YardOperator').to(['read', 'create', 'update']),
       allow.group('Inspector').to(['read']),
@@ -185,24 +185,24 @@ const schema = a.schema({
     .model({
       saleID: a.id().required(),
       boxID: a.id().required(),
-      box: a.belongsTo('Box', 'boxID'),
+      box: a.belongsTo('Box', 'boxID]),
       orgID: a.id().required(),
-      organization: a.belongsTo('Organization', 'orgID'),
+      organization: a.belongsTo('Organization', 'orgID]),
       sellerID: a.id().required(),
-      seller: a.belongsTo('User', 'sellerID'),
+      seller: a.belongsTo('User', 'sellerID]),
       
       // Sale details
       listingTitle: a.string().required(),
       listingDescription: a.string(),
       
       // Auction type and rules
-      auctionType: a.enum(['sealed', 'open'),sealed'),
+      auctionType: a.enum(['sealed', 'open]),sealed]),
       
       // Pricing
       startingPrice: a.float(),
       reservePrice: a.float(),
       currentBid: a.float(),
-      bidCurrency: a.string().default('CAD'),
+      bidCurrency: a.string().default('CAD]),
       minBidIncrement: a.float(), // For open auctions
       
       // Timing
@@ -218,7 +218,7 @@ const schema = a.schema({
       antiSnipingMinutes: a.integer().default(5),
       
       // Status
-      status: a.enum(['draft', 'active', 'closed', 'sold', 'cancelled'),draft'),
+      status: a.enum(['draft', 'active', 'closed', 'sold', 'cancelled]),draft]),
       
       // Winner tracking
       winningBidID: a.id(),
@@ -231,8 +231,8 @@ const schema = a.schema({
       // Audit trail
       bidAuditTrail: a.json(), // Track bid history
       
-      bids: a.hasMany('Bid', 'saleID'),
-      termsAcceptances: a.hasMany('TermsAcceptance', 'saleID'),
+      bids: a.hasMany('Bid', 'saleID]),
+      termsAcceptances: a.hasMany('TermsAcceptance', 'saleID]),
       
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
@@ -241,7 +241,7 @@ const schema = a.schema({
       closedBy: a.id(),
     })
     .authorization((allow) => [
-      allow.group('SuperAdmin'),
+      allow.group('SuperAdmin]),
       allow.group('SellerAdmin').to(['read', 'create', 'update', 'delete']),
       allow.group('YardOperator').to(['read']),
       allow.group('Buyer').to(['read']),
@@ -255,16 +255,16 @@ const schema = a.schema({
     .model({
       bidID: a.id().required(),
       saleID: a.id().required(),
-      sale: a.belongsTo('Sale', 'saleID'),
+      sale: a.belongsTo('Sale', 'saleID]),
       buyerID: a.id().required(),
-      buyer: a.belongsTo('User', 'buyerID'),
+      buyer: a.belongsTo('User', 'buyerID]),
       
       bidAmount: a.float().required(),
-      bidCurrency: a.string().default('CAD'),
+      bidCurrency: a.string().default('CAD]),
       
-      bidStatus: a.enum(['pending', 'accepted', 'rejected', 'outbid'),pending'),
+      bidStatus: a.enum(['pending', 'accepted', 'rejected', 'outbid]),pending]),
       
-      bidType: a.enum(['initial', 'counter', 'auto_increment'),initial'),
+      bidType: a.enum(['initial', 'counter', 'auto_increment]),initial]),
       
       notes: a.string(),
       
@@ -275,7 +275,7 @@ const schema = a.schema({
       updatedAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.group('SuperAdmin'),
+      allow.group('SuperAdmin]),
       allow.group('SellerAdmin').to(['read', 'update']),
       allow.owner().to(['read', 'create']),
       allow.group('Buyer').to(['read', 'create']),
@@ -288,9 +288,9 @@ const schema = a.schema({
     .model({
       acceptanceID: a.id().required(),
       saleID: a.id().required(),
-      sale: a.belongsTo('Sale', 'saleID'),
+      sale: a.belongsTo('Sale', 'saleID]),
       buyerID: a.id().required(),
-      buyer: a.belongsTo('User', 'buyerID'),
+      buyer: a.belongsTo('User', 'buyerID]),
       
       acceptedAt: a.datetime().required(),
       ipAddress: a.string(),
@@ -301,7 +301,7 @@ const schema = a.schema({
       createdAt: a.datetime(),
     })
     .authorization((allow) => [
-      allow.group('SuperAdmin'),
+      allow.group('SuperAdmin]),
       allow.group('SellerAdmin').to(['read']),
       allow.owner().to(['read', 'create']),
     ]),
