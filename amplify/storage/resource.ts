@@ -8,16 +8,6 @@ import { imageProcessor } from '../function/image-processor/resource'
  * - /private/{orgID}/boxes/{boxID}/box-images/     (Box photos, max 10)
  * - /private/{orgID}/boxes/{boxID}/parts/{partID}/ (Part photos, max 10)
  * - /public/marketplace/{saleID}/images/           (Marketplace images)
- * 
- * Features:
- * - Private storage with signed URLs
- * - Organization-scoped access control
- * - Role-based permissions
- * - HEIC/JPG support with auto-conversion (via Lambda)
- * - 5MB max file size
- * - Auto-resize to 2560px max dimension
- * - Generate 800px thumbnails
- * - Strip GPS data, preserve EXIF time/orientation
  */
 export const storage = defineStorage({
   name: 'smashScrapImages',
@@ -35,6 +25,6 @@ export const storage = defineStorage({
     ],
   }),
   triggers: {
-    onUpload: imageProcessor  // Reference the imported function
+    onUpload: imageProcessor
   }
 })
