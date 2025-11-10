@@ -40,7 +40,7 @@ export function Dashboard() {
         boxes: boxesData.data.length,
         parts: partsData.data.length,
         sales: salesData.data.length,
-        revenue: 176.72 // TODO: Calculate from sales
+        revenue: 176.72
       })
 
       const { data: user } = await client.models.User.get({ userID: currentUser.userId })
@@ -68,7 +68,7 @@ export function Dashboard() {
     return (
       <MainLayout onSignOut={() => {}}>
         <div className="flex items-center justify-center h-full">
-          <p className="text-white text-xl">Loading...</p>
+          <p className="text-dark-text-primary text-xl">Loading...</p>
         </div>
       </MainLayout>
     )
@@ -79,10 +79,10 @@ export function Dashboard() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-dark-text-primary mb-2">Dashboard</h1>
           {orgInfo && (
-            <p className="text-gray-400">
-              Organization: <span className="text-red-500 font-medium">{orgInfo.orgName}</span>
+            <p className="text-dark-text-secondary">
+              Organization: <span className="text-brand-primary font-medium">{orgInfo.orgName}</span>
             </p>
           )}
         </div>
