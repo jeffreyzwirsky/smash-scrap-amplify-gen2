@@ -17,16 +17,18 @@ import { Organizations } from './pages/Organizations'
 function App() {
   return (
     <Authenticator>
-      {({ signOut, user }) => <AuthenticatedApp user={user} signOut={signOut} />}
+      {({ signOut, user }) => (
+        <AuthenticatedApp user={user} signOut={signOut} />
+      )}
     </Authenticator>
   )
 }
 
-function AuthenticatedApp({ user, signOut }: any) {
+function AuthenticatedApp({ user, signOut }: { user: any, signOut: any }) {
   const client = generateClient<Schema>()
 
   useEffect(() => {
-    // Create or update User record on first login
+    // Create User record in DynamoDB on first login
     async function ensureUserRecord() {
       try {
         const { data: existingUser } = await client.models.User.get({ 
@@ -41,7 +43,7 @@ function AuthenticatedApp({ user, signOut }: any) {
             role: 'Buyer',
             status: 'active'
           })
-          console.log('✅ User record created')
+          console.log('✅ User record created in DynamoDB')
         }
       } catch (error) {
         console.error('Error ensuring user record:', error)
