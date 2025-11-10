@@ -1,6 +1,3 @@
-# BoxDetails.tsx (Black Theme with Red Buttons)
-
-```typescript
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { generateClient } from 'aws-amplify/data'
@@ -39,6 +36,9 @@ export function BoxDetails() {
   const [parts, setParts] = useState<Part[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddPart, setShowAddPart] = useState(false)
+  // New states for editing and deleting
+  const [editingPart, setEditingPart] = useState<Part | null>(null)
+  const [deletingPart, setDeletingPart] = useState<Part | null>(null)
 
   useEffect(() => {
     fetchBoxDetails()
@@ -75,6 +75,34 @@ export function BoxDetails() {
     } catch (error) {
       console.error('Error finalizing box:', error)
       alert('Failed to finalize box')
+    }
+  }
+
+  async function handleEditPart(partID: string, updates: Partial<Part>) {
+    try {
+      await client.models.Part.update({
+        partID,
+        ...updates
+      });
+      await fetchBoxDetails()
+      setEditingPart(null)
+      // Show success toast here if you use one
+    } catch (error) {
+      console.error('Error updating part:', error)
+      alert('Failed to update part')
+    }
+  }
+
+  async function handleDeletePart(partID: string) {
+    if (!confirm('Delete this part? This cannot be undone.')) return;
+    try {
+      await client.models.Part.delete({ partID });
+      await fetchBoxDetails()
+      setDeletingPart(null)
+      // Show success message here if you use one
+    } catch (error) {
+      console.error('Error deleting part:', error)
+      alert('Failed to delete part')
     }
   }
 
@@ -161,6 +189,7 @@ export function BoxDetails() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Fill Level</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Weight (lb)</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Images</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
@@ -179,6 +208,20 @@ export function BoxDetails() {
                     </td>
                     <td className="px-6 py-4 text-sm text-white">{part.weightLb?.toFixed(2) || 'N/A'}</td>
                     <td className="px-6 py-4 text-sm text-white">{part.images?.length || 0}</td>
+                    <td className="px-6 py-4 flex gap-2">
+                      <button
+                        onClick={() => setEditingPart(part)}
+                        className="text-blue-400 hover:text-blue-300 font-bold"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setDeletingPart(part)}
+                        className="text-red-500 hover:text-red-400 font-bold"
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -196,6 +239,28 @@ export function BoxDetails() {
             setShowAddPart(false)
             fetchBoxDetails()
           }}
+        />
+      )}
+
+      {/* Edit Part Modal */}
+      {editingPart && (
+        <EditPartModal
+          part={editingPart}
+          onSave={async updates => {
+            await handleEditPart(editingPart.partID, updates)
+          }}
+          onClose={() => setEditingPart(null)}
+        />
+      )}
+
+      {/* Delete Part Modal */}
+      {deletingPart && (
+        <DeletePartModal
+          part={deletingPart}
+          onDelete={async () => {
+            await handleDeletePart(deletingPart.partID)
+          }}
+          onClose={() => setDeletingPart(null)}
         />
       )}
     </div>
@@ -299,4 +364,142 @@ function AddPartModal({ boxId, onClose, onSuccess }: { boxId: string, onClose: (
     </div>
   )
 }
-```
+
+function EditPartModal({
+  part,
+  onSave,
+  onClose
+}: {
+  part: Part
+  onSave: (updates: Partial<Part>) => Promise<void>
+  onClose: () => void
+}) {
+  const [partNumber, setPartNumber] = useState(part.partNumber)
+  const [partName, setPartName] = useState(part.partName)
+  const [fillLevel, setFillLevel] = useState(part.fillLevel)
+  const [weight, setWeight] = useState(part.weightLb?.toString() || '')
+  const [submitting, setSubmitting] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setSubmitting(true)
+    await onSave({
+      partNumber,
+      partName,
+      fillLevel,
+      weightLb: weight ? parseFloat(weight) : undefined,
+    })
+    setSubmitting(false)
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-85 flex items-center justify-center z-50">
+      <div className="bg-gray-900 rounded-lg shadow-2xl p-8 max-w-md w-full border border-gray-800">
+        <h2 className="text-2xl font-bold text-white mb-6">Edit Part</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Part Number</label>
+            <input
+              type="text"
+              value={partNumber}
+              onChange={e => setPartNumber(e.target.value)}
+              required
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-400"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Part Name</label>
+            <input
+              type="text"
+              value={partName}
+              onChange={e => setPartName(e.target.value)}
+              required
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-400"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Fill Level</label>
+            <select
+              value={fillLevel}
+              onChange={e => setFillLevel(e.target.value)}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-400"
+            >
+              <option value="empty">Empty</option>
+              <option value="partial">Partial</option>
+              <option value="full">Full</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Weight (lb)</label>
+            <input
+              type="number"
+              step="0.01"
+              value={weight}
+              onChange={e => setWeight(e.target.value)}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-400"
+            />
+          </div>
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 bg-blue-500 hover:bg-blue-400 disabled:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition"
+            >
+              {submitting ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function DeletePartModal({
+  part,
+  onDelete,
+  onClose
+}: { part: Part, onDelete: () => Promise<void>, onClose: () => void }) {
+  const [submitting, setSubmitting] = useState(false)
+
+  async function handleConfirm() {
+    setSubmitting(true)
+    await onDelete()
+    setSubmitting(false)
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-85 flex items-center justify-center z-50">
+      <div className="bg-gray-900 rounded-lg shadow-2xl p-8 max-w-sm w-full border border-gray-800 text-center">
+        <h2 className="text-2xl font-bold text-red-500 mb-6">Delete Part</h2>
+        <p className="mb-4 text-white">
+          Are you sure you want to delete <b>{part.partNumber} - {part.partName}</b>? <br />
+          This cannot be undone.
+        </p>
+        <div className="flex gap-3 pt-4 justify-center">
+          <button
+            onClick={onClose}
+            className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={submitting}
+            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition"
+          >
+            {submitting ? 'Deleting...' : 'Delete'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
