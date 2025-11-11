@@ -1,6 +1,9 @@
 ﻿import { useEffect, useState } from "react";
 import { Card } from "../components/ui/Card";
 import { useToast } from "../components/ui/Toast";
+import UploadDropzone from "../components/ui/UploadDropzone";
+import { useUserRole } from "../hooks/useUserRole";
+import { applyBranding } from "../utils/branding";
 
 type SettingsState = {
   brandName: string;
@@ -10,6 +13,12 @@ type SettingsState = {
   storageBucket: string;
   storagePattern: string;
   featureFlags: { liveBids: boolean; antiSniping: boolean; thumbnails: boolean };
+  brandLogoUrl?: string;
+  brandLogoKey?: string;
+  faviconUrl?: string;
+  faviconKey?: string;
+  appleTouchIconUrl?: string;
+  appleTouchIconKey?: string;
 };
 const KEY = "smash_settings";
 
@@ -21,10 +30,16 @@ const DEFAULTS: SettingsState = {
   storageBucket: "smash-scrap-images-production",
   storagePattern: "{orgID}/boxes/{boxID}/*",
   featureFlags: { liveBids: true, antiSniping: true, thumbnails: false },
+  brandLogoUrl: "",
+  faviconUrl: "",
+  appleTouchIconUrl: "",
 };
 
 export default function Settings() {
   const { push } = useToast();
+  const { groups, orgID } = useUserRole() as any;
+  const isSuperAdmin = (groups || []).includes("SuperAdmin");
+
   const [state, setState] = useState<SettingsState>(DEFAULTS);
 
   useEffect(() => {
@@ -36,7 +51,8 @@ export default function Settings() {
 
   function save() {
     localStorage.setItem(KEY, JSON.stringify(state));
-    push({ title: "Settings saved", desc: "Your configuration was stored locally (MVP)." });
+    applyBranding(); // update favicon/apple icon immediately
+    push({ title: "Settings saved", desc: "Branding & icons applied." });
   }
   function reset() {
     setState(DEFAULTS);
@@ -102,6 +118,79 @@ export default function Settings() {
             ))}
           </div>
         </Card>
+
+        {isSuperAdmin ? (
+          <>
+            <Card title="Logo">
+              <div className="space-y-3">
+                {state.brandLogoUrl ? (
+                  <div className="flex items-center gap-3">
+                    <img src={state.brandLogoUrl} className="h-12 w-auto rounded-md border border-[#1f2d5e] bg-white object-contain" />
+                    <button
+                      onClick={()=>setState(s=>({ ...s, brandLogoUrl:"", brandLogoKey:"" }))}
+                      className="px-3 py-2 bg-[#1f2d5e] hover:bg-[#2a3f6e] rounded-lg text-white text-sm">Remove</button>
+                  </div>
+                ) : (
+                  <div className="text-xs text-gray-400">Upload a transparent PNG/SVG.</div>
+                )}
+                <UploadDropzone
+                  targetPrefix={`${orgID || "public"}/branding/`}
+                  maxFiles={1}
+                  accept="image/*"
+                  onUploaded={(keys, urls)=> setState(s=>({ ...s, brandLogoKey: keys[0], brandLogoUrl: urls[0] }))}
+                />
+              </div>
+            </Card>
+
+            <Card title="Icons (Browser & iPhone)">
+              <div className="space-y-4">
+                <div>
+                  <div className="text-sm text-gray-300 mb-1">Favicon</div>
+                  {state.faviconUrl ? (
+                    <div className="flex items-center gap-3">
+                      <img src={state.faviconUrl} className="h-8 w-8 rounded bg-white object-contain border border-[#1f2d5e]" />
+                      <button
+                        onClick={()=>setState(s=>({ ...s, faviconUrl:"", faviconKey:"" }))}
+                        className="px-3 py-2 bg-[#1f2d5e] hover:bg-[#2a3f6e] rounded-lg text-white text-sm">Remove</button>
+                    </div>
+                  ) : <div className="text-xs text-gray-400">Upload 32×32 or 64×64 PNG/ICO.</div>}
+                  <div className="mt-2">
+                    <UploadDropzone
+                      targetPrefix={`${orgID || "public"}/branding/`}
+                      maxFiles={1}
+                      accept="image/*,.ico"
+                      onUploaded={(k,u)=> setState(s=>({ ...s, faviconKey: k[0], faviconUrl: u[0] }))}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-sm text-gray-300 mb-1">Apple Touch Icon</div>
+                  {state.appleTouchIconUrl ? (
+                    <div className="flex items-center gap-3">
+                      <img src={state.appleTouchIconUrl} className="h-10 w-10 rounded bg-white object-contain border border-[#1f2d5e]" />
+                      <button
+                        onClick={()=>setState(s=>({ ...s, appleTouchIconUrl:"", appleTouchIconKey:"" }))}
+                        className="px-3 py-2 bg-[#1f2d5e] hover:bg-[#2a3f6e] rounded-lg text-white text-sm">Remove</button>
+                    </div>
+                  ) : <div className="text-xs text-gray-400">Upload 180×180 PNG.</div>}
+                  <div className="mt-2">
+                    <UploadDropzone
+                      targetPrefix={`${orgID || "public"}/branding/`}
+                      maxFiles={1}
+                      accept="image/png"
+                      onUploaded={(k,u)=> setState(s=>({ ...s, appleTouchIconKey: k[0], appleTouchIconUrl: u[0] }))}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </>
+        ) : (
+          <Card title="Branding & Icons (SuperAdmin only)">
+            <div className="text-gray-300 text-sm">Only SuperAdmins can update the brand logo and icons.</div>
+          </Card>
+        )}
       </div>
 
       <div className="flex gap-3">
