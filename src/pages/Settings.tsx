@@ -137,7 +137,7 @@ export default function Settings() {
                   targetPrefix={`${orgID || "public"}/branding/`}
                   maxFiles={1}
                   accept="image/*"
-                  onUploaded={(keys, urls)=> setState(s=>({ ...s, brandLogoKey: keys[0], brandLogoUrl: urls[0] }))}
+                  accessLevel="public" onUploaded={(keys, urls)=> setState(s=>({ ...s, brandLogoKey: keys[0], brandLogoUrl: urls[0] }))}
                 />
               </div>
             </Card>
@@ -159,7 +159,7 @@ export default function Settings() {
                       targetPrefix={`${orgID || "public"}/branding/`}
                       maxFiles={1}
                       accept="image/*,.ico"
-                      onUploaded={(k,u)=> setState(s=>({ ...s, faviconKey: k[0], faviconUrl: u[0] }))}
+                      accessLevel="public" onUploaded={(k,u)=> setState(s=>({ ...s, faviconKey: k[0], faviconUrl: u[0] }))}
                     />
                   </div>
                 </div>
@@ -179,7 +179,7 @@ export default function Settings() {
                       targetPrefix={`${orgID || "public"}/branding/`}
                       maxFiles={1}
                       accept="image/png"
-                      onUploaded={(k,u)=> setState(s=>({ ...s, appleTouchIconKey: k[0], appleTouchIconUrl: u[0] }))}
+                      accessLevel="public" onUploaded={(k,u)=> setState(s=>({ ...s, appleTouchIconKey: k[0], appleTouchIconUrl: u[0] }))}
                     />
                   </div>
                 </div>
@@ -200,3 +200,4 @@ export default function Settings() {
     </div>
   );
 }
+

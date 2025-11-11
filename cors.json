@@ -1,0 +1,16 @@
+{
+  "CORSRules": [
+    {
+      "AllowedHeaders": ["*"],
+      "AllowedMethods": ["GET", "PUT", "POST", "HEAD"],
+      "AllowedOrigins": [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://*.amplifyapp.com",
+        "https://*.smashscrap.ca"
+      ],
+      "ExposeHeaders": ["ETag","x-amz-request-id"],
+      "MaxAgeSeconds": 3000
+    }
+  ]
+}
