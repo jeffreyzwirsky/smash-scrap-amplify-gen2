@@ -1,16 +1,47 @@
-import React from "react";
+﻿import React from 'react'
 
-const base =
-  "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
+interface ButtonProps {
+  children: React.ReactNode
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost'
+  size?: 'sm' | 'md' | 'lg'
+  onClick?: () => void
+  disabled?: boolean
+  className?: string
+  type?: 'button' | 'submit' | 'reset'
+}
 
-export function Button(
-  { children, variant = "primary", ...props }:
-  React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "danger" }
-) {
-  const styles = {
-    primary: `${base} bg-[#21808d] text-white hover:bg-[#1b6a74] focus-visible:outline-[#21808d]`,
-    secondary: `${base} bg-white/5 text-white hover:bg-white/10 border border-gray-700 focus-visible:outline-[#21808d]`,
-    danger: `${base} bg-[#c0152f] text-white hover:bg-[#9e1228] focus-visible:outline-[#c0152f]`,
-  }[variant];
-  return <button className={styles} {...props}>{children}</button>;
+export const Button: React.FC<ButtonProps> = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  onClick,
+  disabled = false,
+  className = '',
+  type = 'button'
+}) => {
+  const baseStyles = 'font-bold rounded-lg shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+  
+  const variants = {
+    primary: 'bg-red-600 hover:bg-red-700 text-white',
+    secondary: 'bg-gray-700 hover:bg-gray-600 text-white',
+    danger: 'bg-red-800 hover:bg-red-900 text-white',
+    ghost: 'bg-transparent hover:bg-gray-800 text-gray-300 border border-gray-700'
+  }
+  
+  const sizes = {
+    sm: 'py-2 px-4 text-sm',
+    md: 'py-3 px-6 text-base',
+    lg: 'py-4 px-8 text-lg'
+  }
+  
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`   `}
+    >
+      {children}
+    </button>
+  )
 }
