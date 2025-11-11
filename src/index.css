@@ -3,20 +3,120 @@
 @tailwind utilities;
 
 :root {
-  --bg-primary: #0b1437;
-  --bg-secondary: #111c44;
-  --bg-card: #1a2755;
-  --border-color: #1f2d5e;
-  --text-primary: #ffffff;
-  --text-secondary: #9ca3af;
-  --accent-red: #dc2626;
-  --accent-red-hover: #b91c1c;
+  /* Refined Dark Theme - Better Contrast */
+  --bg-primary: #0f172a;      /* Darker slate for main bg */
+  --bg-secondary: #1e293b;    /* Lighter slate for cards */
+  --bg-tertiary: #334155;     /* Even lighter for hover states */
+  --border-color: #475569;    /* Higher contrast borders */
+  
+  /* Text Colors - Much Better Readability */
+  --text-primary: #f1f5f9;    /* Almost white for main text */
+  --text-secondary: #cbd5e1;  /* Light gray for secondary text */
+  --text-tertiary: #94a3b8;   /* Medium gray for hints */
+  --text-muted: #64748b;      /* Darker gray for less important text */
+  
+  /* Accent Colors - Keeping SMASH red but with variations */
+  --accent-red: #ef4444;      /* Brighter red for better visibility */
+  --accent-red-hover: #dc2626;
+  --accent-red-dark: #b91c1c;
+  
+  /* Success/Warning/Info */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+  --color-danger: #ef4444;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { background: var(--bg-primary); color: var(--text-primary); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-#root { width: 100%; min-height: 100vh; }
-::-webkit-scrollbar { width: 8px; height: 8px; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Better Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--bg-secondary); }
-::-webkit-scrollbar-thumb { background: var(--accent-red); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--accent-red); border-radius: 5px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-red-hover); }
+
+/* Smooth Transitions */
+* {
+  transition-property: background-color, border-color, color, transform, box-shadow, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus Styles - Better Accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--accent-red);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+/* Hover Lift */
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Skeleton Loader */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.skeleton {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background: var(--bg-tertiary);
+}
+
+/* Better Typography Scale */
+h1 { font-size: 2.25rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.025em; }
+h2 { font-size: 1.875rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.025em; }
+h3 { font-size: 1.5rem; font-weight: 600; line-height: 1.4; }
+h4 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+
+p { font-size: 1rem; line-height: 1.75; color: var(--text-secondary); }
+
+/* Badge Styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-success { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.badge-info { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }

@@ -1,8 +1,10 @@
 ﻿import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Boxes from "./pages/Boxes";
+import BoxDetail from "./pages/BoxDetail";
 import Marketplace from "./pages/Marketplace";
 import Organizations from "./pages/Organizations";
+import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 
 export default function AutoRoutes() {
@@ -11,8 +13,10 @@ export default function AutoRoutes() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/boxes" element={<Boxes />} />
+      <Route path="/boxes/:boxId" element={<BoxDetail />} />
       <Route path="/marketplace" element={<Marketplace />} />
       <Route path="/organizations" element={<Organizations />} />
+      <Route path="/users" element={<Users />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="*" element={<div className="p-6 text-white">Page not found</div>} />
     </Routes>
