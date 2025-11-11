@@ -1,80 +1,68 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { generateClient } from 'aws-amplify/data'
-import type { Schema } from '../../amplify/data/resource'
-import { MainLayout } from '../components/layout/MainLayout'
-import { Card } from '../components/ui/Card'
-import { Gavel } from 'lucide-react'
+﻿import React, { useEffect, useState } from 'react';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '../../amplify/data/resource';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 
-export function Marketplace() {
-  const client = generateClient<Schema>()
-  const navigate = useNavigate()
-  const [sales, setSales] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+export default function Marketplace() {
+  const client = generateClient<Schema>();
+  const [sales, setSales] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchSales()
-  }, [])
+    fetchSales();
+  }, []);
 
   async function fetchSales() {
     try {
-      const { data } = await client.models.Sale.list()
-      setSales(data)
+      const { data } = await client.models.Sale.list();
+      setSales(data || []);
     } catch (error) {
-      console.error('Error fetching sales:', error)
+      console.error('Error fetching sales:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
-  if (loading) {
-    return (
-      <MainLayout onSignOut={() => {}}>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-dark-text-primary text-xl">Loading...</p>
-        </div>
-      </MainLayout>
-    )
-  }
-
   return (
-    <MainLayout onRefresh={fetchSales} onSignOut={() => {}}>
-      <div className="space-y-6">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-dark-text-primary mb-2">Marketplace</h1>
-          <p className="text-dark-text-secondary">Browse active auctions and sales</p>
+          <h1 className="text-3xl font-bold text-white">Marketplace</h1>
+          <p className="text-gray-400 mt-1">Browse active auctions and listings</p>
         </div>
+      </div>
 
-        {sales.length === 0 ? (
-          <Card>
-            <div className="text-center py-12">
-              <Gavel className="w-16 h-16 text-dark-text-muted mx-auto mb-4" />
-              <p className="text-dark-text-secondary">No active sales</p>
-            </div>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Card>
+        {loading ? (
+          <div className="text-white">Loading marketplace...</div>
+        ) : sales.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {sales.map((sale) => (
-              <Card
+              <div
                 key={sale.saleID}
-                className="hover:border-brand-primary/50 cursor-pointer transition-all"
-                padding="md"
-                onClick={() => navigate(`/marketplace/${sale.saleID}`)}
+                className="p-4 bg-[#1a1a1a] rounded-lg border border-[#404040] hover:border-[#dc2626] transition-colors"
               >
-                <h3 className="text-lg font-bold text-dark-text-primary mb-3">{sale.title}</h3>
-                <div className="space-y-2 text-sm">
-                  <p className="text-dark-text-secondary">
-                    Current Bid: <span className="text-brand-primary font-bold">${sale.currentPrice}</span>
-                  </p>
-                  <p className="text-dark-text-muted text-xs">
-                    Ends: {sale.endDate ? new Date(sale.endDate).toLocaleDateString() : 'N/A'}
-                  </p>
+                <div className="flex items-start justify-between mb-2">
+                  <p className="text-white font-medium">Sale #{sale.saleID?.slice(0, 8)}</p>
+                  <span className={`px-2 py-1 rounded text-xs font-medium `}>
+                    {sale.status}
+                  </span>
                 </div>
-              </Card>
+                <p className="text-gray-400 text-sm mb-2">{sale.description || 'No description'}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[#dc2626] font-bold">$+""+{sale.currentBid || 0}+""+</p>
+                  <Button variant="ghost" size="sm">View Details</Button>
+                </div>
+              </div>
             ))}
           </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-400 mb-4">No active listings</p>
+          </div>
         )}
-      </div>
-    </MainLayout>
-  )
+      </Card>
+    </div>
+  );
 }

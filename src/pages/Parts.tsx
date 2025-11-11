@@ -1,82 +1,62 @@
-import { useEffect, useState } from 'react'
-import { generateClient } from 'aws-amplify/data'
-import type { Schema } from '../../amplify/data/resource'
-import { MainLayout } from '../components/layout/MainLayout'
-import { Card } from '../components/ui/Card'
-import { Settings } from 'lucide-react'
+﻿import React, { useEffect, useState } from 'react';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '../../amplify/data/resource';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 
-export function Parts() {
-  const client = generateClient<Schema>()
-  const [parts, setParts] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+export default function Parts() {
+  const client = generateClient<Schema>();
+  const [parts, setParts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchParts()
-  }, [])
+    fetchParts();
+  }, []);
 
   async function fetchParts() {
     try {
-      const { data } = await client.models.Part.list()
-      setParts(data)
+      const { data } = await client.models.Part.list();
+      setParts(data || []);
     } catch (error) {
-      console.error('Error fetching parts:', error)
+      console.error('Error fetching parts:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
-  if (loading) {
-    return (
-      <MainLayout onSignOut={() => {}}>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-dark-text-primary text-xl">Loading...</p>
-        </div>
-      </MainLayout>
-    )
-  }
-
   return (
-    <MainLayout onRefresh={fetchParts} onSignOut={() => {}}>
-      <div className="space-y-6">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-dark-text-primary mb-2">Parts Management</h1>
-          <p className="text-dark-text-secondary">View and manage catalytic converter parts</p>
+          <h1 className="text-3xl font-bold text-white">Parts</h1>
+          <p className="text-gray-400 mt-1">Manage catalytic converter parts</p>
         </div>
-
-        <Card>
-          {parts.length === 0 ? (
-            <div className="text-center py-12">
-              <Settings className="w-16 h-16 text-dark-text-muted mx-auto mb-4" />
-              <p className="text-dark-text-secondary">No parts available</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-dark-bg-border">
-                  <tr>
-                    <th className="text-left py-3 px-4 text-dark-text-muted text-sm font-medium">Part Number</th>
-                    <th className="text-left py-3 px-4 text-dark-text-muted text-sm font-medium">Type</th>
-                    <th className="text-left py-3 px-4 text-dark-text-muted text-sm font-medium">Weight</th>
-                    <th className="text-left py-3 px-4 text-dark-text-muted text-sm font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-dark-bg-border">
-                  {parts.map((part) => (
-                    <tr key={part.partID} className="hover:bg-dark-bg-hover transition-colors">
-                      <td className="py-3 px-4 text-dark-text-primary text-sm">{part.partNumber}</td>
-                      <td className="py-3 px-4 text-dark-text-secondary text-sm">{part.materialType}</td>
-                      <td className="py-3 px-4 text-dark-text-secondary text-sm">{part.weight || 'N/A'}</td>
-                      <td className="py-3 px-4">
-                        <span className="px-2 py-1 bg-green-500/10 text-green-500 text-xs rounded">Active</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </Card>
+        <Button variant="primary">Add Part</Button>
       </div>
-    </MainLayout>
-  )
+
+      <Card>
+        {loading ? (
+          <div className="text-white">Loading parts...</div>
+        ) : parts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {parts.map((part) => (
+              <div
+                key={part.partID}
+                className="p-4 bg-[#1a1a1a] rounded-lg border border-[#404040] hover:border-[#dc2626] transition-colors"
+              >
+                <p className="text-white font-medium">{part.partNumber}</p>
+                <p className="text-gray-400 text-sm">{part.description || 'No description'}</p>
+                <p className="text-[#dc2626] text-sm mt-2">Qty: {part.quantity || 0}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-400 mb-4">No parts yet</p>
+            <Button variant="primary">Add Your First Part</Button>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
 }
