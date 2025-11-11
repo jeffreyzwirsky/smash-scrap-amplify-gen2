@@ -2,11 +2,11 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Boxes from "./pages/Boxes";
+import BoxDetail from "./pages/BoxDetail";
 import Parts from "./pages/Parts";
 import Marketplace from "./pages/Marketplace";
 import Organizations from "./pages/Organizations";
 import Settings from "./pages/Settings";
-import BoxDetail from "./pages/BoxDetail";
 import SaleDetail from "./pages/SaleDetail";
 
 export default function AutoRoutes() {
@@ -21,6 +21,7 @@ export default function AutoRoutes() {
       <Route path="/marketplace/:saleId" element={<SaleDetail />} />
       <Route path="/organizations" element={<Organizations />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="*" element={<div className="p-6 text-white">Page not found</div>} />
     </Routes>
   );
 }

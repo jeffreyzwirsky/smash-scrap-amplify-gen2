@@ -7,7 +7,7 @@ import "./App.css";
 import { MainLayout } from "./components/layout/MainLayout";
 import { ToastProvider } from "./components/ui/Toast";
 import { applyBranding } from "./utils/branding";
-import AutoRoutes from "./auto-routes"; // we will generate this shim below if missing
+import AutoRoutes from "./auto-routes";
 
 function BrandBoot() {
   React.useEffect(() => { try { applyBranding(); } catch {} }, []);
