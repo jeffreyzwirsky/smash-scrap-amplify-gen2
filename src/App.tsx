@@ -1,18 +1,12 @@
-import { Authenticator } from '@aws-amplify/ui-react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useEffect } from 'react'
-import { generateClient } from 'aws-amplify/data'
-import type { Schema } from '../amplify/data/resource'
-import '@aws-amplify/ui-react/styles.css'
-// ❌ REMOVED: import './App.css'
-import { Dashboard } from './pages/Dashboard'
-import { Boxes } from './pages/Boxes'
-import { BoxDetails } from './pages/BoxDetails'
-import { Parts } from './pages/Parts'
-import { Marketplace } from './pages/Marketplace'
-import { MarketplaceListing } from './pages/MarketplaceListing'
-import { SaleDetails } from './pages/SaleDetails'
-import { Organizations } from './pages/Organizations'
+import { Authenticator } from '@aws-amplify/ui-react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '../amplify/data/resource';
+import '@aws-amplify/ui-react/styles.css';
+import './App.css';
+import Dashboard from './pages/Dashboard';  // ✅ No curly braces
+import { MainLayout } from './components/layout/MainLayout';
 
 function App() {
   return (
@@ -21,66 +15,53 @@ function App() {
         <AuthenticatedApp user={user} signOut={signOut} />
       )}
     </Authenticator>
-  )
+  );
 }
 
 function AuthenticatedApp({ user, signOut }: { user: any; signOut: any }) {
-  const client = generateClient<Schema>()
+  const client = generateClient<Schema>();
 
   useEffect(() => {
-    async function ensureOrganizationAndUser() {
+    async function ensureUserRecord() {
       try {
-        const { data: existingOrgs } = await client.models.Organization.list({
-          filter: { orgID: { eq: 'default-org' } }
-        })
-        
-        if (!existingOrgs || existingOrgs.length === 0) {
-          await client.models.Organization.create({
-            orgID: 'default-org',
-            orgName: 'Default Organization',
-            status: 'active'
-          })
-        }
-
         const { data: existingUser } = await client.models.User.get({ 
           userID: user.userId 
-        })
+        });
         
         if (!existingUser) {
           await client.models.User.create({
             userID: user.userId,
-            email: user.signInDetails?.loginId || '',
+            email: user.signInDetails?.loginId ?? '',
             orgID: 'default-org',
             role: 'Buyer',
-            status: 'active'
-          })
+            status: 'ACTIVE',
+          });
         }
       } catch (error) {
-        console.error('Error setting up organization/user:', error)
+        console.error('Error creating user record:', error);
       }
     }
-
+    
     if (user?.userId) {
-      ensureOrganizationAndUser()
+      ensureUserRecord();
     }
-  }, [user?.userId])
+  }, [user?.userId]);
 
-  // ✅ NO NAV BAR HERE - Dashboard.tsx now uses MainLayout which includes Sidebar + TopBar
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/boxes" element={<Boxes />} />
-        <Route path="/boxes/:boxId" element={<BoxDetails />} />
-        <Route path="/parts" element={<Parts />} />
-        <Route path="/marketplace" element={<Marketplace />} />
-        <Route path="/marketplace/:saleId" element={<MarketplaceListing />} />
-        <Route path="/sales/:saleId" element={<SaleDetails />} />
-        <Route path="/organizations" element={<Organizations />} />
-      </Routes>
-    </Router>
-  )
+    <BrowserRouter>
+      <MainLayout user={user} signOut={signOut}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="*" element={
+            <div className="text-white text-center py-12">
+              Page Not Found
+            </div>
+          } />
+        </Routes>
+      </MainLayout>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
