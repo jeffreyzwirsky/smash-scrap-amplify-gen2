@@ -1,0 +1,76 @@
+﻿The issue with your schema is the Box authorization rule:
+allow.ownerDefinedIn('orgID')
+
+This doesn't work correctly. Here's the fixed version:
+
+Box: a
+  .model({
+    boxID: a.id(),
+    orgID: a.id().required(),
+    organization: a.belongsTo('Organization', 'orgID'),
+    sellerID: a.id(),
+    seller: a.belongsTo('User', 'sellerID'),
+    boxNumber: a.string().required(),
+    status: a.enum(['draft', 'in_progress', 'finalized', 'listed', 'sold']).default('draft'),
+    location: a.string(),
+    materialType: a.enum(['Mixed', 'Ceramic', 'Foil', 'Bead', 'aluminum', 'copper', 'brass', 'stainless', 'steel', 'mixed']),
+    
+    // Dimensions
+    length: a.float(),
+    width: a.float(),
+    height: a.float(),
+    dimensionUnit: a.enum(['inches', 'cm']),
+    
+    // Weights
+    grossWeightLb: a.float().default(0),
+    tareWeightLb: a.float().default(0),
+    netWeightLb: a.float().default(0),
+    grossWeightKg: a.float().default(0),
+    tareWeightKg: a.float().default(0),
+    netWeightKg: a.float().default(0),
+    
+    // Legacy weight fields (for compatibility)
+    grossWeight: a.float(),
+    tareWeight: a.float(),
+    netWeight: a.float(),
+    
+    // Finalization
+    isFinalized: a.boolean().default(false),
+    finalizedAt: a.datetime(),
+    finalizedBy: a.id(),
+    finalizeRecord: a.json(),
+    
+    // Images & Parts
+    images: a.string().array(),
+    imagesCount: a.integer().default(0),
+    partsCount: a.integer().default(0),
+    parts: a.hasMany('Part', 'boxID'),
+    sale: a.hasOne('Sale', 'boxID'),
+    
+    // Notes & Audit
+    notes: a.string(),
+    createdAt: a.datetime(),
+    updatedAt: a.datetime(),
+    createdBy: a.id().required(),
+    updatedBy: a.id(),
+  })
+  .identifier(['boxID'])
+  .authorization((allow) => [
+    // SuperAdmin has full access
+    allow.group('SuperAdmin'),
+    
+    // SellerAdmin can create/read/update/delete
+    allow.group('SellerAdmin').to(['create', 'read', 'update', 'delete']),
+    
+    // YardOperator can create/read/update (no delete)
+    allow.group('YardOperator').to(['create', 'read', 'update']),
+    
+    // Inspector can read only
+    allow.group('Inspector').to(['read']),
+    
+    // Buyers can read (for marketplace)
+    allow.group('Buyer').to(['read']),
+    
+    // All authenticated users can read
+    allow.authenticated().to(['read']),
+  ]),
