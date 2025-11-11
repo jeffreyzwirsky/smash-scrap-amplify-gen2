@@ -1,47 +1,23 @@
-﻿import React from 'react'
+﻿import React from 'react';
 
-interface ButtonProps {
-  children: React.ReactNode
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost'
-  size?: 'sm' | 'md' | 'lg'
-  onClick?: () => void
-  disabled?: boolean
-  className?: string
-  type?: 'button' | 'submit' | 'reset'
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  children: React.ReactNode;
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  children,
-  variant = 'primary',
-  size = 'md',
-  onClick,
-  disabled = false,
-  className = '',
-  type = 'button'
-}) => {
-  const baseStyles = 'font-bold rounded-lg shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
-  
-  const variants = {
-    primary: 'bg-red-600 hover:bg-red-700 text-white',
-    secondary: 'bg-gray-700 hover:bg-gray-600 text-white',
-    danger: 'bg-red-800 hover:bg-red-900 text-white',
-    ghost: 'bg-transparent hover:bg-gray-800 text-gray-300 border border-gray-700'
-  }
-  
-  const sizes = {
-    sm: 'py-2 px-4 text-sm',
-    md: 'py-3 px-6 text-base',
-    lg: 'py-4 px-8 text-lg'
-  }
-  
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={`   `}
-    >
-      {children}
-    </button>
-  )
+export function Button({ variant = 'primary', size = 'md', children, className = '', ...props }: ButtonProps) {
+  const baseClasses = 'font-medium rounded-lg transition-colors inline-flex items-center justify-center';
+  const variantClasses = {
+    primary: 'bg-brand-teal hover:bg-brand-tealDark text-white',
+    secondary: 'bg-slate-700 hover:bg-slate-600 text-white',
+    danger: 'bg-brand-red hover:bg-brand-redDark text-white',
+    ghost: 'bg-transparent border border-slate-700 hover:bg-slate-800 text-white',
+  };
+  const sizeClasses = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2',
+    lg: 'px-6 py-3 text-lg',
+  };
+  return <button className={`   `} {...props}>{children}</button>;
 }

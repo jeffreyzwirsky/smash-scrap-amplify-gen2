@@ -1,127 +1,49 @@
-import { Fragment } from "react";
-import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import { NavLink } from "react-router-dom";
+﻿import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { HomeIcon, CubeIcon, ShoppingCartIcon, ChartBarIcon, BuildingOfficeIcon, UsersIcon, Cog6ToothIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
-/**
- * Sidebar supports:
- * - Mobile: slide-over <Dialog>
- * - Desktop: sticky panel
- * - Active link styling with NavLink
- */
-type SidebarProps = {
-  open: boolean;
+interface SidebarProps {
+  isOpen: boolean;
   onClose: () => void;
-};
-
-const nav = [
-  { to: "/", label: "Dashboard", icon: "📊" },
-  { to: "/boxes", label: "Boxes", icon: "📦" },
-  { to: "/parts", label: "Parts", icon: "🧩" },
-  { to: "/marketplace", label: "Marketplace", icon: "🏷️" },
-  { to: "/users", label: "Users", icon: "👥" },
-];
-
-function NavItems({ onSelect }: { onSelect?: () => void }) {
-  return (
-    <nav className="flex-1 overflow-y-auto py-4">
-      <ul className="space-y-1 px-3">
-        {nav.map((item) => (
-          <li key={item.to}>
-            <NavLink
-              to={item.to}
-              onClick={onSelect}
-              className={({ isActive }) =>
-                `
-                group flex items-center gap-3 rounded-lg px-3 py-2 text-sm
-                transition
-                ${isActive
-                  ? "bg-[#0b1437]/60 text-white ring-1 ring-gray-700"
-                  : "text-slate-300 hover:text-white hover:bg-white/5"}
-              `
-              }
-              aria-label={item.label}
-            >
-              <span className="text-base">{item.icon}</span>
-              <span className="truncate">{item.label}</span>
-            </NavLink>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
 }
 
-export default function Sidebar({ open, onClose }: SidebarProps) {
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const location = useLocation();
+  const menuItems = [
+    { path: '/dashboard', icon: HomeIcon, label: 'Dashboard' },
+    { path: '/boxes', icon: CubeIcon, label: 'Boxes' },
+    { path: '/parts', icon: ChartBarIcon, label: 'Parts' },
+    { path: '/marketplace', icon: ShoppingCartIcon, label: 'Marketplace' },
+    { path: '/organizations', icon: BuildingOfficeIcon, label: 'Organizations' },
+    { path: '/users', icon: UsersIcon, label: 'Users' },
+    { path: '/settings', icon: Cog6ToothIcon, label: 'Settings' },
+  ];
+
   return (
     <>
-      {/* Mobile drawer */}
-      <Transition show={open} as={Fragment}>
-        <Dialog as="div" className="relative z-50 lg:hidden" onClose={onClose}>
-          <Transition.Child
-            as={Fragment}
-            enter="transition-opacity ease-linear duration-150"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition-opacity ease-linear duration-150"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black/50" />
-          </Transition.Child>
-
-          <div className="fixed inset-0 flex">
-            <Transition.Child
-              as={Fragment}
-              enter="transition ease-in-out duration-200 transform"
-              enterFrom="-translate-x-full"
-              enterTo="translate-x-0"
-              leave="transition ease-in-out duration-200 transform"
-              leaveFrom="translate-x-0"
-              leaveTo="-translate-x-full"
-            >
-              <Dialog.Panel className="relative w-72 max-w-full bg-[#0f172a] border-r border-gray-800 flex flex-col">
-                <div className="flex items-center justify-between p-4 border-b border-gray-800">
-                  <div className="font-semibold">SMASH SCRAP</div>
-                  <button
-                    onClick={onClose}
-                    className="rounded-md p-2 hover:bg-white/5"
-                    aria-label="Close sidebar"
-                  >
-                    <XMarkIcon className="h-6 w-6" />
-                  </button>
-                </div>
-                <NavItems onSelect={onClose} />
-                <div className="p-4 border-t border-gray-800 text-xs text-slate-400">
-                  v0.1 • ca-central-1
-                </div>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </Dialog>
-      </Transition>
-
-      {/* Desktop sticky sidebar */}
-      <aside
-        className="
-          hidden lg:flex lg:flex-col
-          bg-[#0f172a] border-r border-gray-800
-          sticky top-0 h-screen
-        "
-      >
-        <div className="p-6 border-b border-gray-800">
-          {/* Replace with your SVG logo as needed */}
-          <div className="text-lg font-semibold tracking-wide">
-            SMASH <span className="text-[#c0152f]">SCRAP</span>
-          </div>
-          <div className="text-xs text-slate-400">The Scrap Metal Auction Hub</div>
+      {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
+      <aside className={`fixed lg:sticky top-0 left-0 z-50 lg:z-0 w-64 h-screen bg-dark-100 border-r border-slate-800 flex flex-col transition-transform duration-300 lg:translate-x-0 `}>
+        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+          <h1 className="text-2xl font-bold"><span className="text-brand-red">SMASH</span><span className="text-white"> SCRAP</span></h1>
+          <button onClick={onClose} className="lg:hidden p-2 rounded-lg hover:bg-slate-800 text-slate-400"><XMarkIcon className="h-6 w-6" /></button>
         </div>
-
-        <NavItems />
-
-        <div className="p-4 border-t border-gray-800 text-xs text-slate-400">
-          © {new Date().getFullYear()} SMASH
-        </div>
+        <nav className="flex-1 overflow-y-auto py-4 px-3">
+          <ul className="space-y-1">
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              const Icon = item.icon;
+              return (
+                <li key={item.path}>
+                  <Link to={item.path} onClick={onClose} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all `}>
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+        <div className="p-4 border-t border-slate-800"><p className="text-xs text-slate-500 text-center">© 2025 SMASH SCRAP</p></div>
       </aside>
     </>
   );

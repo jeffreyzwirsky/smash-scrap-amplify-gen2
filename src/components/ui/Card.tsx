@@ -1,38 +1,22 @@
-import React from 'react'
+﻿import React from 'react';
 
 interface CardProps {
-  children: React.ReactNode
-  className?: string
-  title?: string
-  action?: React.ReactNode
-  padding?: 'none' | 'sm' | 'md' | 'lg'
+  children: React.ReactNode;
+  className?: string;
+  title?: string;
+  action?: React.ReactNode;
 }
 
-export const Card: React.FC<CardProps> = ({
-  children,
-  className = '',
-  title,
-  action,
-  padding = 'md'
-}) => {
-  const paddingClasses = {
-    none: '',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8'
-  }
-
+export function Card({ children, className = '', title, action }: CardProps) {
   return (
-    <div className={`bg-dark-bg-tertiary border border-dark-bg-border rounded-xl shadow-lg ${className}`}>
-      {title && (
-        <div className={`flex justify-between items-center border-b border-dark-bg-border pb-4 ${paddingClasses[padding]}`}>
-          <h3 className="text-lg font-semibold text-dark-text-primary">{title}</h3>
-          {action}
+    <div className={`bg-dark-100 border border-slate-700 rounded-xl shadow-card `}>
+      {(title || action) && (
+        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+          {title && <h3 className="text-lg font-semibold text-white">{title}</h3>}
+          {action && <div>{action}</div>}
         </div>
       )}
-      <div className={title ? `${paddingClasses[padding]} pt-4` : paddingClasses[padding]}>
-        {children}
-      </div>
+      <div className="p-6">{children}</div>
     </div>
-  )
+  );
 }
