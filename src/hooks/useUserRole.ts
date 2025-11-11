@@ -2,38 +2,24 @@
 import { fetchAuthSession, fetchUserAttributes } from 'aws-amplify/auth';
 
 export function useUserRole() {
-  const [userRole, setUserRole] = useState({
-    email: '',
-    userId: '',
-    groups: [] as string[],
-    role: '',
-    orgID: '',
-    loading: true,
-  });
-
+  const [data, setData] = useState({ email: '', userId: '', groups: [] as string[], role: '', orgID: '', loading: true });
   useEffect(() => {
-    async function loadUserData() {
+    (async () => {
       try {
-        const [session, attributes] = await Promise.all([
-          fetchAuthSession(),
-          fetchUserAttributes(),
-        ]);
-        const groups = (session.tokens?.accessToken?.payload['cognito:groups'] as string[]) || [];
-        setUserRole({
-          email: attributes.email || '',
-          userId: attributes.sub || '',
-          groups,
-          role: (attributes['custom:role'] as string) || '',
-          orgID: (attributes['custom:orgID'] as string) || '',
-          loading: false,
+        const [session, attrs] = await Promise.all([fetchAuthSession(), fetchUserAttributes()]);
+        setData({
+          email: attrs.email || '',
+          userId: attrs.sub || '',
+          groups: (session.tokens?.accessToken?.payload['cognito:groups'] as string[]) || [],
+          role: (attrs['custom:role'] as string) || '',
+          orgID: (attrs['custom:orgID'] as string) || '',
+          loading: false
         });
-      } catch (error) {
-        console.error('Error loading user data:', error);
-        setUserRole(prev => ({ ...prev, loading: false }));
+      } catch (e) {
+        console.error(e);
+        setData(p => ({ ...p, loading: false }));
       }
-    }
-    loadUserData();
+    })();
   }, []);
-
-  return userRole;
+  return data;
 }

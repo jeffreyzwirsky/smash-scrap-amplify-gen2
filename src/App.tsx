@@ -17,7 +17,7 @@ export default function App() {
         <BrowserRouter>
           <MainLayout user={user} signOut={signOut}>
             <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<Navigate to="/dashboard" />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/boxes" element={<Boxes />} />
               <Route path="/parts" element={<Parts />} />
