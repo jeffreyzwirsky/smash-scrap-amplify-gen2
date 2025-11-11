@@ -1,5 +1,6 @@
 ﻿import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
+import Inventory from "./pages/Inventory";
 import Boxes from "./pages/Boxes";
 import BoxDetail from "./pages/BoxDetail";
 import Marketplace from "./pages/Marketplace";
@@ -14,6 +15,7 @@ export default function AutoRoutes() {
     <Routes>
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/inventory" element={<Inventory />} />
       <Route path="/boxes" element={<Boxes />} />
       <Route path="/boxes/:boxId" element={<BoxDetail />} />
       <Route path="/marketplace" element={<Marketplace />} />

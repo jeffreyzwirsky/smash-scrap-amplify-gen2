@@ -1,17 +1,20 @@
 ﻿import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 export function Modal({
   open,
   onClose,
   title,
   children,
+  size = "md",
 }: {
   open: boolean;
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  size?: "sm" | "md" | "lg" | "xl";
 }) {
-  // Lock scroll when modal is open
+  // Lock body scroll when modal is open
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -34,26 +37,41 @@ export function Modal({
 
   if (!open) return null;
 
-  return (
+  const sizes = {
+    sm: "max-w-md",
+    md: "max-w-2xl",
+    lg: "max-w-4xl",
+    xl: "max-w-6xl",
+  };
+
+  // Use React Portal to render modal at body level (above all other content)
+  return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ zIndex: 9999 }}
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{
+        zIndex: 99999,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      }}
     >
-      {/* Backdrop */}
+      {/* Backdrop - highest z-index */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         onClick={onClose}
-        style={{ zIndex: 9999 }}
+        style={{ zIndex: 99998 }}
       />
 
-      {/* Modal Content */}
+      {/* Modal Content - even higher z-index */}
       <div
-        className="relative bg-[#1e293b] border border-[#475569] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-        style={{ zIndex: 10000 }}
+        className={`relative bg-[#1e293b] border border-[#475569] rounded-xl shadow-2xl w-full ${sizes[size]} max-h-[90vh] overflow-hidden flex flex-col`}
+        style={{ zIndex: 99999 }}
       >
-        {/* Header */}
+        {/* Header - Fixed at top */}
         {title && (
-          <div className="sticky top-0 bg-[#1e293b] border-b border-[#475569] px-6 py-4 flex items-center justify-between z-10">
+          <div className="flex-shrink-0 bg-[#1e293b] border-b border-[#475569] px-6 py-4 flex items-center justify-between">
             <h3 className="text-xl font-bold text-[#f1f5f9]">{title}</h3>
             <button
               onClick={onClose}
@@ -66,9 +84,10 @@ export function Modal({
           </div>
         )}
 
-        {/* Body */}
-        <div className="p-6">{children}</div>
+        {/* Scrollable Body */}
+        <div className="flex-1 overflow-y-auto p-6">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
