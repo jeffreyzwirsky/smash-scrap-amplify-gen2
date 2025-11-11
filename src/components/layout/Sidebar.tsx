@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { HomeIcon, CubeIcon, ShoppingCartIcon, ChartBarIcon, BuildingOfficeIcon, UsersIcon, Cog6ToothIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, CubeIcon, ShoppingCartIcon, ChartBarIcon, BuildingOfficeIcon, UsersIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useUserRole } from '../../hooks/useUserRole';
 
 interface SidebarProps {
@@ -22,7 +22,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     { path: '/marketplace', icon: ShoppingCartIcon, label: 'Marketplace', show: true },
     { path: '/organizations', icon: BuildingOfficeIcon, label: 'Organizations', show: canManageOrg },
     { path: '/users', icon: UsersIcon, label: 'Users', show: canManageOrg },
-    { path: '/settings', icon: Cog6ToothIcon, label: 'Settings', show: true },
   ];
 
   return (
@@ -46,26 +45,22 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           flex flex-col
           transition-transform duration-300
           lg:translate-x-0
-          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          `
         `}
       >
-        {/* Logo */}
-        <div className="p-4 border-b border-[#404040] flex items-center justify-between">
-          <h1 className="text-lg font-bold">
-            <span className="text-[#dc2626]">SMASH</span>
-            <span className="text-white"> SCRAP</span>
-          </h1>
+        {/* Mobile Close Button */}
+        <div className="lg:hidden p-4 border-b border-[#404040] flex items-center justify-end">
           <button
             onClick={onClose}
-            className="lg:hidden p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400"
+            className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400"
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
         
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-3 px-2">
-          <ul className="space-y-0.5">
+        <nav className="flex-1 overflow-y-auto py-4 px-3">
+          <ul className="space-y-1">
             {menuItems.filter(item => item.show).map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
@@ -75,15 +70,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     to={item.path}
                     onClick={onClose}
                     className={`
-                      flex items-center gap-2.5 px-3 py-2 rounded-lg
+                      flex items-center gap-3 px-3 py-2.5 rounded-lg
                       text-sm font-medium transition-all
-                      ${isActive
-                        ? 'bg-[#dc2626] text-white'
-                        : 'text-gray-400 hover:bg-[#2a2a2a] hover:text-white'
-                      }
+                      `
                     `}
                   >
-                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    <Icon className="h-5 w-5 flex-shrink-0" />
                     <span>{item.label}</span>
                   </Link>
                 </li>
@@ -93,7 +85,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
         
         {/* Footer */}
-        <div className="p-3 border-t border-[#404040]">
+        <div className="p-4 border-t border-[#404040]">
           <p className="text-xs text-gray-500 text-center">© 2025 SMASH SCRAP</p>
         </div>
       </aside>
