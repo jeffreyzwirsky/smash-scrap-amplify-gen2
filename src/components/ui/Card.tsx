@@ -1,15 +1,6 @@
-import { ReactNode } from 'react';
-
-export function Card({
-  title,
-  action,
-  children,
-  className = ''
-}: {
-  title?: string;
-  action?: ReactNode;
-  children: ReactNode;
-  className?: string;
+﻿import { ReactNode } from "react";
+export function Card({ title, action, children, className = "" }:{
+  title?: string; action?: ReactNode; children: ReactNode; className?: string;
 }) {
   return (
     <div className={`bg-[#111c44] border border-[#1f2d5e] rounded-2xl shadow-xl ${className}`}>
