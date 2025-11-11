@@ -6,6 +6,8 @@ import Marketplace from "./pages/Marketplace";
 import Organizations from "./pages/Organizations";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
+import OperatorApp from "./pages/OperatorApp";
+import Diagnostics from "./pages/Diagnostics";
 
 export default function AutoRoutes() {
   return (
@@ -17,6 +19,8 @@ export default function AutoRoutes() {
       <Route path="/marketplace" element={<Marketplace />} />
       <Route path="/organizations" element={<Organizations />} />
       <Route path="/users" element={<Users />} />
+      <Route path="/operator" element={<OperatorApp />} />
+      <Route path="/diagnostics" element={<Diagnostics />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="*" element={<div className="p-6 text-white">Page not found</div>} />
     </Routes>

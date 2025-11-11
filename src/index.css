@@ -4,19 +4,19 @@
 
 :root {
   /* Refined Dark Theme - Better Contrast */
-  --bg-primary: #0f172a;      /* Darker slate for main bg */
-  --bg-secondary: #1e293b;    /* Lighter slate for cards */
-  --bg-tertiary: #334155;     /* Even lighter for hover states */
-  --border-color: #475569;    /* Higher contrast borders */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --border-color: #475569;
   
   /* Text Colors - Much Better Readability */
-  --text-primary: #f1f5f9;    /* Almost white for main text */
-  --text-secondary: #cbd5e1;  /* Light gray for secondary text */
-  --text-tertiary: #94a3b8;   /* Medium gray for hints */
-  --text-muted: #64748b;      /* Darker gray for less important text */
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-muted: #64748b;
   
-  /* Accent Colors - Keeping SMASH red but with variations */
-  --accent-red: #ef4444;      /* Brighter red for better visibility */
+  /* Accent Colors */
+  --accent-red: #ef4444;
   --accent-red-hover: #dc2626;
   --accent-red-dark: #b91c1c;
   
@@ -46,6 +46,8 @@ html, body {
 #root {
   width: 100%;
   min-height: 100vh;
+  position: relative;
+  z-index: 0;
 }
 
 /* Better Scrollbar */
@@ -61,7 +63,7 @@ html, body {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Focus Styles - Better Accessibility */
+/* Focus Styles */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
@@ -96,7 +98,7 @@ textarea:focus-visible {
   background: var(--bg-tertiary);
 }
 
-/* Better Typography Scale */
+/* Typography Scale */
 h1 { font-size: 2.25rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.025em; }
 h2 { font-size: 1.875rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.025em; }
 h3 { font-size: 1.5rem; font-weight: 600; line-height: 1.4; }
@@ -120,3 +122,15 @@ p { font-size: 1rem; line-height: 1.75; color: var(--text-secondary); }
 .badge-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 .badge-danger { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 .badge-info { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+
+/* Z-Index Layers */
+.z-sidebar { z-index: 100; }
+.z-topbar { z-index: 200; }
+.z-dropdown { z-index: 1000; }
+.z-modal { z-index: 9999; }
+.z-toast { z-index: 10000; }
+
+/* Prevent body scroll when modal open */
+body.modal-open {
+  overflow: hidden;
+}
