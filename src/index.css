@@ -1,11 +1,9 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html {
   box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 html, body {
@@ -13,16 +11,13 @@ html, body {
   padding: 0;
   width: 100%;
   min-height: 100vh;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  background-color: #0b1437;
+  background-color: #000000;
   color: #ffffff;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
 *, *::before, *::after {
@@ -31,27 +26,21 @@ html, body {
 
 ::-webkit-scrollbar {
   width: 10px;
-  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b1437;
+  background: #1a1a1a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #dc2626;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #b91c1c;
 }
 
 button {
-  font-family: inherit;
   cursor: pointer;
-}
-
-html {
-  scroll-behavior: smooth;
 }
