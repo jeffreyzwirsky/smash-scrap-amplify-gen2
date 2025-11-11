@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { fetchAuthSession, fetchUserAttributes } from 'aws-amplify/auth';
 
 export interface UserRole {
