@@ -1,0 +1,8 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["s3:PutObject","s3:GetObject","s3:DeleteObject"],
+    "Resource": "arn:aws:s3:::amplify-smashscrapamplify-smashscrapimagesbucket38-7e65eap37ezl/public/*"
+  }]
+}
