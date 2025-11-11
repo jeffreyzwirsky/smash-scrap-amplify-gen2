@@ -1,7 +1,8 @@
-﻿import { Authenticator } from '@aws-amplify/ui-react';
+import { Authenticator } from '@aws-amplify/ui-react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import '@aws-amplify/ui-react/styles.css';
 import './App.css';
+
 import { MainLayout } from './components/layout/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Boxes from './pages/Boxes';
