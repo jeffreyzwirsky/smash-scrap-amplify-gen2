@@ -7,40 +7,49 @@ import { useUserRole } from "../hooks/useUserRole";
 const client = generateClient<Schema>();
 
 export default function Dashboard() {
-  const { email } = useUserRole();
+  const { email, orgID, orgName } = useUserRole();
   const [stats, setStats] = useState({ boxes: 0, parts: 0, sales: 0, revenue: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!orgID) return;
     (async () => {
       try {
+        // Fetch only THIS organization's data
         const [b, p, s] = await Promise.all([
-          client.models.Box.list(),
-          client.models.Part.list(),
-          client.models.Sale.list(),
+          client.models.Box.list({ filter: { orgID: { eq: orgID } } }),
+          client.models.Part.list({ filter: { orgID: { eq: orgID } } }),
+          client.models.Sale.list({ filter: { orgID: { eq: orgID } } }),
         ]);
         const revenue = (s.data || []).reduce((sum, sale) => sum + (sale.currentBid || 0), 0);
-        setStats({ boxes: (b.data || []).length, parts: (p.data || []).length, sales: (s.data || []).length, revenue });
+        setStats({
+          boxes: (b.data || []).length,
+          parts: (p.data || []).length,
+          sales: (s.data || []).length,
+          revenue,
+        });
       } catch (e) {
         console.error(e);
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [orgID]);
 
   const statCards = [
-    { label: "Total Revenue", value: `$${stats.revenue.toLocaleString()}`, change: "+12.5% vs last month", bg: "from-blue-600 to-blue-700" },
-    { label: "Inventory Value", value: stats.boxes, change: `${stats.boxes} items in stock`, bg: "from-green-600 to-green-700" },
-    { label: "Active Sales", value: stats.sales, change: "3 ending today", bg: "from-purple-600 to-purple-700" },
-    { label: "Parts Catalog", value: stats.parts, change: "Available", bg: "from-orange-600 to-orange-700" },
+    { label: "Total Revenue", value: `$${stats.revenue.toLocaleString()}`, change: "+12.5%", bg: "from-blue-600 to-blue-700" },
+    { label: "Inventory", value: stats.boxes, change: `${stats.boxes} boxes`, bg: "from-green-600 to-green-700" },
+    { label: "Active Sales", value: stats.sales, change: "Marketplace", bg: "from-purple-600 to-purple-700" },
+    { label: "Parts", value: stats.parts, change: "Catalog", bg: "from-orange-600 to-orange-700" },
   ];
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-        <p className="text-gray-400 mt-1">Welcome back, {email.split("@")[0]}!</p>
+        <p className="text-gray-400 mt-1">
+          {orgName} • {email.split("@")[0]}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -53,23 +62,9 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Card title="Recent Activity">
-            <div className="text-gray-400 text-center py-8">No recent activity</div>
-          </Card>
-        </div>
-        <Card title="Quick Actions">
-          <div className="space-y-2">
-            <button className="w-full px-4 py-3 bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded-lg font-medium text-left transition">
-              + Create Box
-            </button>
-            <button className="w-full px-4 py-3 bg-[#1f2d5e] hover:bg-[#2a3f6e] text-white rounded-lg font-medium text-left transition">
-              → View Marketplace
-            </button>
-          </div>
-        </Card>
-      </div>
+      <Card title="Recent Activity">
+        <div className="text-gray-400 text-center py-8">No recent activity for {orgName}</div>
+      </Card>
     </div>
   );
 }
