@@ -27,17 +27,29 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
-      {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+      
+      {/* Sidebar */}
       <aside
         className={`
-          fixed lg:sticky top-0 left-0 z-50 lg:z-0
+          fixed lg:static
+          top-0 left-0 
+          z-50 lg:z-0
           w-56 h-screen
           bg-[#1a1a1a] border-r border-[#404040]
           flex flex-col
-          transition-transform duration-300 lg:translate-x-0
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          transition-transform duration-300
+          lg:translate-x-0
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
+        {/* Logo */}
         <div className="p-4 border-b border-[#404040] flex items-center justify-between">
           <h1 className="text-lg font-bold">
             <span className="text-[#dc2626]">SMASH</span>
@@ -50,6 +62,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
+        
+        {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-3 px-2">
           <ul className="space-y-0.5">
             {menuItems.filter(item => item.show).map((item) => {
@@ -77,6 +91,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             })}
           </ul>
         </nav>
+        
+        {/* Footer */}
         <div className="p-3 border-t border-[#404040]">
           <p className="text-xs text-gray-500 text-center">© 2025 SMASH SCRAP</p>
         </div>
