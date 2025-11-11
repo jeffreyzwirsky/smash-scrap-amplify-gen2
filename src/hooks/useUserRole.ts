@@ -1,20 +1,13 @@
 ﻿import { useEffect, useState } from 'react';
 import { fetchAuthSession, fetchUserAttributes } from 'aws-amplify/auth';
 
-export interface UserRole {
-  email: string;
-  userId: string;
-  groups: string[];
-  role?: string;
-  orgID?: string;
-  loading: boolean;
-}
-
-export function useUserRole(): UserRole {
-  const [userRole, setUserRole] = useState<UserRole>({
+export function useUserRole() {
+  const [userRole, setUserRole] = useState({
     email: '',
     userId: '',
-    groups: [],
+    groups: [] as string[],
+    role: '',
+    orgID: '',
     loading: true,
   });
 
@@ -25,15 +18,13 @@ export function useUserRole(): UserRole {
           fetchAuthSession(),
           fetchUserAttributes(),
         ]);
-
-        const groups = session.tokens?.accessToken?.payload['cognito:groups'] as string[] || [];
-
+        const groups = (session.tokens?.accessToken?.payload['cognito:groups'] as string[]) || [];
         setUserRole({
           email: attributes.email || '',
           userId: attributes.sub || '',
           groups,
-          role: attributes['custom:role'],
-          orgID: attributes['custom:orgID'],
+          role: (attributes['custom:role'] as string) || '',
+          orgID: (attributes['custom:orgID'] as string) || '',
           loading: false,
         });
       } catch (error) {
@@ -41,7 +32,6 @@ export function useUserRole(): UserRole {
         setUserRole(prev => ({ ...prev, loading: false }));
       }
     }
-
     loadUserData();
   }, []);
 

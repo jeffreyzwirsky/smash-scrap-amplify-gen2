@@ -1,12 +1,5 @@
 ﻿[data-amplify-authenticator] {
-  --amplify-colors-background-primary: #000000;
+  --amplify-colors-background-primary: #000;
   --amplify-colors-background-secondary: #1a1a1a;
-  --amplify-colors-font-primary: #ffffff;
-  --amplify-colors-brand-primary-10: #dc2626;
-  --amplify-colors-brand-primary-80: #ef4444;
-  --amplify-colors-brand-primary-90: #f87171;
-  --amplify-colors-brand-primary-100: #fca5a5;
+  --amplify-colors-brand-primary-80: #dc2626;
 }
-[data-amplify-authenticator] [data-amplify-container] { background-color: #1a1a1a; border: 1px solid #404040; }
-[data-amplify-authenticator] button[type='submit'] { background-color: #dc2626; }
-[data-amplify-authenticator] button[type='submit']:hover { background-color: #b91c1c; }

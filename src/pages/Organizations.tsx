@@ -1,21 +1,9 @@
-﻿import React from 'react';
-import { Card } from '../components/ui/Card';
-
+﻿import { Card } from '../components/ui/Card';
 export default function Organizations() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Organizations</h1>
-          <p className="text-gray-400 mt-1">Manage organizations and tenants</p>
-        </div>
-      </div>
-
-      <Card>
-        <div className="text-white text-center py-12">
-          <p className="text-gray-400">Organization management coming soon...</p>
-        </div>
-      </Card>
+      <h1 className="text-3xl font-bold text-white">Organizations</h1>
+      <Card><div className="text-gray-400">Organizations management coming soon...</div></Card>
     </div>
   );
 }
