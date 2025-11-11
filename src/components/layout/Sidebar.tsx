@@ -26,7 +26,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -34,7 +33,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         />
       )}
       
-      {/* Sidebar */}
       <aside
         className={`
           fixed lg:static
@@ -45,7 +43,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           flex flex-col
           transition-transform duration-300
           lg:translate-x-0
-          `
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
         {/* Mobile Close Button */}
@@ -72,7 +70,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     className={`
                       flex items-center gap-3 px-3 py-2.5 rounded-lg
                       text-sm font-medium transition-all
-                      `
+                      ${isActive
+                        ? 'bg-[#dc2626] text-white'
+                        : 'text-gray-400 hover:bg-[#2a2a2a] hover:text-white'
+                      }
                     `}
                   >
                     <Icon className="h-5 w-5 flex-shrink-0" />
