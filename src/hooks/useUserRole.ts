@@ -1,25 +1,51 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchAuthSession, fetchUserAttributes } from 'aws-amplify/auth';
 
+type RoleData = {
+  email: string;
+  userId: string;
+  groups: string[];
+  role: string;
+  orgID: string;
+  loading: boolean;
+};
+
 export function useUserRole() {
-  const [data, setData] = useState({ email: '', userId: '', groups: [] as string[], role: '', orgID: '', loading: true });
+  const [data, setData] = useState<RoleData>({
+    email: '',
+    userId: '',
+    groups: [],
+    role: '',
+    orgID: '',
+    loading: true
+  });
+
   useEffect(() => {
     (async () => {
       try {
-        const [session, attrs] = await Promise.all([fetchAuthSession(), fetchUserAttributes()]);
+        const [session, attrs] = await Promise.all([
+          fetchAuthSession(),
+          fetchUserAttributes()
+        ]);
+
+        const groups =
+          (session.tokens?.accessToken?.payload?.['cognito:groups'] as string[]) ??
+          [];
+
         setData({
-          email: attrs.email || '',
-          userId: attrs.sub || '',
-          groups: (session.tokens?.accessToken?.payload['cognito:groups'] as string[]) || [],
-          role: (attrs['custom:role'] as string) || '',
-          orgID: (attrs['custom:orgID'] as string) || '',
+          email: (attrs.email as string) ?? '',
+          userId: (attrs.sub as string) ?? '',
+          groups,
+          role: (attrs['custom:role'] as string) ?? '',
+          orgID: (attrs['custom:orgID'] as string) ?? '',
           loading: false
         });
       } catch (e) {
-        console.error(e);
-        setData(p => ({ ...p, loading: false }));
+        console.error('useUserRole:', e);
+        setData((p) => ({ ...p, loading: false }));
       }
     })();
   }, []);
+
   return data;
 }
