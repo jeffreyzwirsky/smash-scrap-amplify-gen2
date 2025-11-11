@@ -1,4 +1,4 @@
-import { Authenticator } from '@aws-amplify/ui-react';
+﻿import { Authenticator } from '@aws-amplify/ui-react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
@@ -66,9 +66,10 @@ function AuthenticatedApp({ user, signOut }: { user: any; signOut: any }) {
           <Route path="/users" element={<Users />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={
-            <div className="text-white text-center py-12">
-              <h1 className="text-2xl font-bold mb-2">Page Not Found</h1>
-              <p className="text-gray-400">The page you're looking for doesn't exist.</p>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+              <h1 className="text-4xl font-bold text-white mb-2">404</h1>
+              <p className="text-gray-400 mb-4">Page Not Found</p>
+              <p className="text-gray-500 text-sm">The page you're looking for doesn't exist.</p>
             </div>
           } />
         </Routes>
